@@ -15,20 +15,32 @@ import {
   Sparkles,
   Layers,
   CheckCircle2,
+  X,
+  Flame,
+  Package,
 } from 'lucide-react';
 import PageTransition from '@/components/animations/PageTransition';
 
 interface CatalogViewProps {
   initialProducts: Product[];
   categories: Category[];
+  soldCounts?: Record<string, number>;
 }
 
-export default function CatalogView({ initialProducts, categories }: CatalogViewProps) {
+export default function CatalogView({
+  initialProducts,
+  categories,
+  soldCounts = {},
+}: CatalogViewProps) {
   const { addItem, getItemQuantity, updateQuantity } = useCart();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Modal Detail Produk State
+  const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
+  const [detailQuantity, setDetailQuantity] = useState<number>(1);
 
   // Filter products by category and search keyword
   const filteredProducts = useMemo(() => {
@@ -71,6 +83,29 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
 
   const handleDecreaseQuantity = (productId: string, currentQty: number) => {
     updateQuantity(productId, currentQty - 1);
+  };
+
+  const handleOpenDetail = (product: Product) => {
+    setSelectedDetailProduct(product);
+    setDetailQuantity(1);
+  };
+
+  const handleAddDetailToCart = (product: Product) => {
+    const res = addItem(product, detailQuantity);
+    if (res.success) {
+      setAddedProductId(product.id);
+      setToastMessage(`Berhasil menambahkan ${detailQuantity}x ${product.name} ke keranjang!`);
+      setTimeout(() => {
+        setAddedProductId(null);
+        setToastMessage(null);
+      }, 2000);
+      setSelectedDetailProduct(null);
+    } else if (res.message) {
+      setToastMessage(res.message);
+      setTimeout(() => {
+        setToastMessage(null);
+      }, 2500);
+    }
   };
 
   return (
@@ -188,11 +223,13 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
               const isOutOfStock = product.stock_quantity <= 0;
               const isMaxInCart = inCartQty >= product.stock_quantity;
               const isJustAdded = addedProductId === product.id;
+              const soldCount = soldCounts[product.id] || 0;
 
               return (
                 <div
                   key={product.id}
-                  className="group flex flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+                  onClick={() => handleOpenDetail(product)}
+                  className="group flex flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border border-zinc-200/90 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 cursor-pointer"
                 >
                   {/* Top Image Container */}
                   <div className="relative aspect-4/3 sm:aspect-4/3 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
@@ -241,12 +278,22 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                   <div className="flex flex-1 flex-col p-3.5 sm:p-5">
                     {/* Title & Description */}
                     <div className="flex-1">
-                      <h3 className="text-xs sm:text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
-                        {product.name}
-                      </h3>
+                      <div className="flex items-start justify-between gap-1">
+                        <h3 className="text-xs sm:text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">
+                          {product.name}
+                        </h3>
+                      </div>
                       <p className="mt-1 line-clamp-2 text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed min-h-[28px] sm:min-h-[32px]">
                         {product.description || 'Pilihan lezat dan berkualitas untuk dinikmati kapan saja.'}
                       </p>
+
+                      {/* Badge Terjual X pcs (Ringkas di Kartu Katalog) */}
+                      {soldCount > 0 && (
+                        <div className="mt-1.5 flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                          <Flame className="h-3 w-3" />
+                          <span>Terjual {soldCount} pcs</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Price Tag */}
@@ -269,7 +316,7 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                     </div>
 
                     {/* Action Button: Rapi, Proporsional, Full-width & Nyaman di Jempol */}
-                    <div className="mt-3">
+                    <div className="mt-3" onClick={(e) => e.stopPropagation()}>
                       {isOutOfStock ? (
                         <button
                           type="button"
@@ -342,6 +389,171 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
           </div>
         )}
       </div>
+
+      {/* Modal Detail Produk Interaktif & Responsif */}
+      {selectedDetailProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[92vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+              <div className="flex items-center gap-2">
+                {selectedDetailProduct.category?.name && (
+                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                    {selectedDetailProduct.category.name}
+                  </span>
+                )}
+                <span className="text-xs font-semibold text-zinc-400">Detail Produk</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetailProduct(null)}
+                className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition"
+                aria-label="Tutup detail"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body (Scrollable) */}
+            <div className="overflow-y-auto p-6 space-y-6 flex-1">
+              {/* Product Image */}
+              <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800 shadow-inner">
+                {selectedDetailProduct.image_url ? (
+                  <Image
+                    src={selectedDetailProduct.image_url}
+                    alt={selectedDetailProduct.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 600px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-zinc-400">
+                    <ShoppingBag className="h-16 w-16" />
+                  </div>
+                )}
+
+                {/* Stock Tag on Image */}
+                <div className="absolute right-3 top-3">
+                  {selectedDetailProduct.stock_quantity <= 0 ? (
+                    <span className="rounded-full bg-rose-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                      Stok Habis
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-bold text-white shadow-md">
+                      Tersedia: {selectedDetailProduct.stock_quantity} pcs
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Title, Price, & Badges */}
+              <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 className="text-xl sm:text-2xl font-black text-zinc-900 dark:text-zinc-50">
+                    {selectedDetailProduct.name}
+                  </h2>
+                  <div className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400">
+                    {formatCurrency(selectedDetailProduct.price)}
+                  </div>
+                </div>
+
+                {/* Stats Badge Terjual & Sisa Stok */}
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/60">
+                    <Flame className="h-3.5 w-3.5 text-amber-500" />
+                    <span>
+                      Terjual {soldCounts[selectedDetailProduct.id] || 0} pcs
+                    </span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                    <Package className="h-3.5 w-3.5 text-zinc-400" />
+                    <span>Sisa Stok: {selectedDetailProduct.stock_quantity} unit</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="rounded-2xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-1.5">
+                  Deskripsi Lengkap
+                </h4>
+                <p className="text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-wrap">
+                  {selectedDetailProduct.description ||
+                    'Produk pilihan terbaik yang diproses higienis dan disajikan segar untuk kepuasan Anda.'}
+                </p>
+              </div>
+
+              {/* Quantity Selector */}
+              {selectedDetailProduct.stock_quantity > 0 && (
+                <div className="flex items-center justify-between rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
+                  <div>
+                    <span className="block text-xs font-bold text-zinc-700 dark:text-zinc-200">
+                      Jumlah Pesanan
+                    </span>
+                    <span className="text-[11px] text-zinc-400">
+                      Maksimal pembelian: {selectedDetailProduct.stock_quantity} unit
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      disabled={detailQuantity <= 1}
+                      onClick={() => setDetailQuantity((q) => Math.max(1, q - 1))}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="w-8 text-center text-base font-black text-zinc-900 dark:text-zinc-100">
+                      {detailQuantity}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={detailQuantity >= selectedDetailProduct.stock_quantity}
+                      onClick={() =>
+                        setDetailQuantity((q) =>
+                          Math.min(selectedDetailProduct.stock_quantity, q + 1)
+                        )
+                      }
+                      className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer / Direct Add Button */}
+            <div className="border-t border-zinc-100 p-4 sm:p-6 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-950/60">
+              {selectedDetailProduct.stock_quantity <= 0 ? (
+                <button
+                  type="button"
+                  disabled
+                  className="w-full rounded-2xl bg-zinc-200 py-3.5 text-center text-sm font-bold text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
+                >
+                  Stok Habis
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleAddDetailToCart(selectedDetailProduct)}
+                  className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-6 py-4 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700 active:scale-[0.99]"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShoppingBag className="h-5 w-5" />
+                    <span>Tambah ke Keranjang ({detailQuantity} pcs)</span>
+                  </span>
+                  <span className="text-base font-black">
+                    {formatCurrency(selectedDetailProduct.price * detailQuantity)}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </PageTransition>
   );
 }

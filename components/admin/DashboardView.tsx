@@ -21,7 +21,74 @@ import {
   Loader2,
   Check,
   RefreshCw,
+  Calendar,
+  MessageCircle,
 } from 'lucide-react';
+
+function WhatsAppIcon({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.301-.15-1.78-.878-2.056-.979-.275-.101-.475-.15-.675.15-.2.301-.776.979-.951 1.18-.175.2-.351.226-.652.075-.3-.151-1.27-.468-2.42-1.493-.895-.798-1.5-1.783-1.675-2.083-.175-.3-.019-.462.132-.612.135-.135.301-.351.451-.527.151-.175.2-.301.301-.501.101-.2.05-.376-.025-.526-.075-.151-.675-1.628-.925-2.23-.244-.587-.492-.507-.676-.517-.175-.01-.375-.01-.576-.01s-.526.075-.802.376c-.276.301-1.052 1.028-1.052 2.508 0 1.48 1.077 2.909 1.228 3.109.15.2 2.12 3.238 5.136 4.542.717.311 1.278.497 1.715.636.721.229 1.377.197 1.896.119.579-.087 1.78-.727 2.03-1.429.25-.702.25-1.303.175-1.429-.075-.125-.276-.201-.576-.351zM12.04 2C6.52 2 2.039 6.481 2.039 12c0 1.959.566 3.788 1.547 5.334L2 22l4.825-1.543A9.972 9.972 0 0012.04 22c5.52 0 10.001-4.481 10.001-10S17.56 2 12.04 2zm0 18.2c-1.614 0-3.123-.46-4.407-1.258l-.316-.195-2.868.917.917-2.868-.195-.316A8.163 8.163 0 013.84 12c0-4.522 3.678-8.2 8.2-8.2 4.522 0 8.2 3.678 8.2 8.2 0 4.522-3.678 8.2-8.2 8.2z" />
+    </svg>
+  );
+}
+
+// Format nomor telepon Indonesia ke standar internasional (628xxx)
+function formatIndonesianPhoneNumber(phone: string): string {
+  let cleaned = phone.replace(/\D/g, '');
+  if (cleaned.startsWith('0')) {
+    cleaned = '62' + cleaned.substring(1);
+  } else if (cleaned.startsWith('8')) {
+    cleaned = '62' + cleaned;
+  }
+  return cleaned;
+}
+
+// Template pesan WhatsApp tagihan & verifikasi pesanan
+function generateWhatsAppBillingMessage(order: OrderWithItems): string {
+  const itemsText =
+    order.items && order.items.length > 0
+      ? order.items
+          .map(
+            (it, idx) =>
+              `${idx + 1}. *${it.product_name_snapshot}* (${it.quantity}x) = ${formatCurrency(
+                it.line_total
+              )}`
+          )
+          .join('\n')
+      : '-';
+
+  const addressText =
+    order.customer_address && order.customer_address.trim()
+      ? order.customer_address.trim()
+      : 'Ambil di Tempat / Tanpa Alamat Khusus';
+
+  const message = `Halo Kak *${order.customer_name}*, terima kasih telah memesan di *QuickOrder Store*! 🙏✨
+
+Kami ingin melakukan konfirmasi & verifikasi pesanan Anda:
+📋 *No. Pesanan:* ${order.order_number}
+📅 *Waktu Pemesanan:* ${formatDate(order.created_at)}
+
+🛒 *Rincian Produk yang Dipesan:*
+${itemsText}
+
+📍 *Alamat / Catatan Pengiriman:*
+${addressText}
+_(Mohon verifikasi apakah alamat pengiriman di atas sudah benar)_
+
+💰 *TOTAL PEMBAYARAN:* *${formatCurrency(order.total)}*
+
+💳 *Instruksi Pembayaran Transfer Bank:*
+Silakan melakukan transfer sesuai total di atas ke rekening resmi kami:
+🏦 *Bank BCA:* 123-456-7890 (a.n. QuickOrder Store)
+🏦 *Bank Mandiri:* 987-654-3210 (a.n. QuickOrder Store)
+
+Setelah melakukan pembayaran, mohon kirimkan foto/screenshot *Bukti Transfer* ke WhatsApp ini agar pesanan Anda dapat segera kami proses & kirimkan. 
+
+Terima kasih banyak atas kerjasamanya! 😊🙏`;
+
+  return encodeURIComponent(message);
+}
 import {
   ResponsiveContainer,
   AreaChart,
@@ -56,6 +123,11 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isUpdatingStatus, setIsUpdatingStatus] = useState<string | null>(null);
+
+  // Date Filter State
+  const [datePreset, setDatePreset] = useState<'all' | 'today' | '7days' | '30days' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState<string>('');
+  const [customEndDate, setCustomEndDate] = useState<string>('');
 
   // New order banner toast notification
   const [newOrderAlert, setNewOrderAlert] = useState<{
@@ -135,16 +207,62 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
     }
   };
 
-  // 2. Summary Cards Metrics
+  // 2. Filter Orders berdasarkan Rentang Tanggal yang Dipilih
+  const dateFilteredOrders = useMemo(() => {
+    if (datePreset === 'all') {
+      return orders;
+    }
+
+    const now = new Date();
+    let start = new Date();
+    let end = new Date();
+
+    if (datePreset === 'today') {
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+    } else if (datePreset === '7days') {
+      start.setDate(now.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+    } else if (datePreset === '30days') {
+      start.setDate(now.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(23, 59, 59, 999);
+    } else if (datePreset === 'custom') {
+      if (!customStartDate && !customEndDate) return orders;
+      if (customStartDate) {
+        start = new Date(customStartDate);
+        start.setHours(0, 0, 0, 0);
+      } else {
+        start = new Date('2000-01-01');
+      }
+      if (customEndDate) {
+        end = new Date(customEndDate);
+        end.setHours(23, 59, 59, 999);
+      } else {
+        end = new Date('2099-12-31');
+      }
+    }
+
+    const startTime = start.getTime();
+    const endTime = end.getTime();
+
+    return orders.filter((o) => {
+      const orderTime = new Date(o.created_at).getTime();
+      return orderTime >= startTime && orderTime <= endTime;
+    });
+  }, [orders, datePreset, customStartDate, customEndDate]);
+
+  // 3. Summary Cards Metrics (tersinkronisasi 100% dengan filter tanggal)
   const summaryMetrics = useMemo(() => {
-    const totalOrders = orders.length;
+    const totalOrders = dateFilteredOrders.length;
     let pendingCount = 0;
     let processingCount = 0;
     let completedCount = 0;
     let cancelledCount = 0;
     let totalRevenue = 0;
 
-    orders.forEach((o) => {
+    dateFilteredOrders.forEach((o) => {
       if (o.status === 'Pending') pendingCount++;
       else if (o.status === 'Processing') processingCount++;
       else if (o.status === 'Completed') {
@@ -163,37 +281,74 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
       cancelledCount,
       totalRevenue,
     };
-  }, [orders]);
+  }, [dateFilteredOrders]);
 
-  // 3. Data Grafik Tren Penjualan per Hari (7 Hari Terakhir)
+  // 4. Data Grafik Tren Penjualan per Hari (tersinkronisasi dengan rentang tanggal)
   const salesChartData = useMemo(() => {
-    const last7DaysMap: Record<string, { label: string; revenue: number; count: number }> = {};
+    const daysMap: Record<string, { label: string; revenue: number; count: number }> = {};
 
-    // Inisialisasi 7 hari ke belakang
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+    let daysCount = 7;
+    let baseEnd = new Date();
+
+    if (datePreset === 'today') {
+      daysCount = 1;
+    } else if (datePreset === '7days') {
+      daysCount = 7;
+    } else if (datePreset === '30days') {
+      daysCount = 30;
+    } else if (datePreset === 'custom' && customStartDate && customEndDate) {
+      const startMs = new Date(customStartDate).getTime();
+      const endMs = new Date(customEndDate).getTime();
+      const diffDays = Math.ceil((endMs - startMs) / (1000 * 3600 * 24)) + 1;
+      daysCount = Math.min(Math.max(diffDays, 1), 60);
+      baseEnd = new Date(customEndDate);
+    } else if (datePreset === 'all' && dateFilteredOrders.length > 0) {
+      // Tampilkan seluruh tanggal transaksi
+      const sorted = [...dateFilteredOrders].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      sorted.forEach((o) => {
+        if (o.status === 'Cancelled') return;
+        const key = o.created_at.split('T')[0];
+        if (!daysMap[key]) {
+          const d = new Date(o.created_at);
+          const label = new Intl.DateTimeFormat('id-ID', {
+            day: 'numeric',
+            month: 'short',
+          }).format(d);
+          daysMap[key] = { label, revenue: 0, count: 0 };
+        }
+        daysMap[key].revenue += o.total;
+        daysMap[key].count += 1;
+      });
+      return Object.values(daysMap);
+    }
+
+    // Default interval slots
+    for (let i = daysCount - 1; i >= 0; i--) {
+      const d = new Date(baseEnd);
       d.setDate(d.getDate() - i);
       const key = d.toISOString().split('T')[0];
       const label = new Intl.DateTimeFormat('id-ID', {
         day: 'numeric',
         month: 'short',
       }).format(d);
-      last7DaysMap[key] = { label, revenue: 0, count: 0 };
+      daysMap[key] = { label, revenue: 0, count: 0 };
     }
 
-    orders.forEach((o) => {
+    dateFilteredOrders.forEach((o) => {
       if (o.status === 'Cancelled') return;
       const orderDateKey = o.created_at.split('T')[0];
-      if (last7DaysMap[orderDateKey]) {
-        last7DaysMap[orderDateKey].revenue += o.total;
-        last7DaysMap[orderDateKey].count += 1;
+      if (daysMap[orderDateKey]) {
+        daysMap[orderDateKey].revenue += o.total;
+        daysMap[orderDateKey].count += 1;
       }
     });
 
-    return Object.values(last7DaysMap);
-  }, [orders]);
+    return Object.values(daysMap);
+  }, [dateFilteredOrders, datePreset, customStartDate, customEndDate]);
 
-  // 4. Data Grafik Distribusi Status Pesanan (Pie Chart)
+  // 5. Data Grafik Distribusi Status Pesanan (Pie Chart)
   const statusPieData = useMemo(() => {
     return [
       { name: 'Pending', value: summaryMetrics.pendingCount, color: STATUS_COLORS.Pending },
@@ -203,9 +358,9 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
     ].filter((item) => item.value > 0);
   }, [summaryMetrics]);
 
-  // 5. Filter Tabel Pesanan
+  // 6. Filter Tabel Pesanan (Status, Pencarian, & Rentang Tanggal)
   const filteredOrders = useMemo(() => {
-    return orders.filter((o) => {
+    return dateFilteredOrders.filter((o) => {
       if (selectedStatusFilter !== 'all' && o.status !== selectedStatusFilter) {
         return false;
       }
@@ -218,7 +373,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
       }
       return true;
     });
-  }, [orders, selectedStatusFilter, searchQuery]);
+  }, [dateFilteredOrders, selectedStatusFilter, searchQuery]);
 
   // Handler ubah status pesanan
   const handleUpdateStatus = async (
@@ -333,6 +488,73 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
         </button>
       </div>
 
+      {/* Date Filter Bar */}
+      <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-zinc-400 mr-1">
+            <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <span>Filter Tanggal:</span>
+          </div>
+
+          {[
+            { id: 'today', label: 'Hari Ini' },
+            { id: '7days', label: '7 Hari Terakhir' },
+            { id: '30days', label: '30 Hari Terakhir' },
+            { id: 'all', label: 'Semua Waktu' },
+            { id: 'custom', label: 'Kustom Rentang' },
+          ].map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => setDatePreset(preset.id as any)}
+              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+                datePreset === preset.id
+                  ? 'bg-blue-600 text-white shadow-xs scale-[1.02]'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+              }`}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Custom Date Range Inputs */}
+        {datePreset === 'custom' && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-zinc-100 dark:border-zinc-800">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-zinc-400">Mulai:</span>
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className="rounded-xl border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
+              />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-medium text-zinc-400">Sampai:</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className="rounded-xl border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
+              />
+            </div>
+            {(customStartDate || customEndDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                }}
+                className="rounded-lg bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* 1. Summary Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {/* Total Pesanan */}
@@ -403,7 +625,20 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-                Tren Omzet Penjualan (7 Hari Terakhir)
+                Tren Omzet Penjualan{' '}
+                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                  (
+                  {datePreset === 'today'
+                    ? 'Hari Ini'
+                    : datePreset === '7days'
+                    ? '7 Hari Terakhir'
+                    : datePreset === '30days'
+                    ? '30 Hari Terakhir'
+                    : datePreset === 'custom'
+                    ? 'Rentang Kustom'
+                    : 'Semua Waktu'}
+                  )
+                </span>
               </h3>
               <p className="text-xs text-zinc-400">Grafik akumulasi transaksi harian</p>
             </div>
@@ -872,6 +1107,24 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                   Item tidak ditemukan.
                 </div>
               )}
+            </div>
+
+            {/* Tombol Hubungi via WhatsApp (Tagihan & Verifikasi) */}
+            <div className="mt-5 rounded-2xl bg-emerald-50/70 p-4 border border-emerald-100 dark:border-emerald-950 dark:bg-emerald-950/20">
+              <a
+                href={`https://wa.me/${formatIndonesianPhoneNumber(
+                  activeModalOrder.customer_phone
+                )}?text=${generateWhatsAppBillingMessage(activeModalOrder)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-700 hover:scale-[1.01] active:scale-[0.99]"
+              >
+                <WhatsAppIcon className="h-5 w-5" />
+                <span>Hubungi via WhatsApp (Tagihan & Verifikasi)</span>
+              </a>
+              <p className="mt-2 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
+                Otomatis memformat nomor ke <strong>{formatIndonesianPhoneNumber(activeModalOrder.customer_phone)}</strong> dan menyusun template rincian pesanan, alamat, & instruksi transfer bank.
+              </p>
             </div>
 
             {/* Change Status Controls */}

@@ -68,10 +68,16 @@ function LoginContent() {
       }
 
       if (isAdmin) {
-        router.push('/admin/dashboard');
-      } else {
-        router.push(redirectTo);
+        // Tolak admin masuk lewat portal customer agar sesi tidak tercampur
+        await supabase.auth.signOut();
+        setErrorMessage(
+          'Akses ditolak. Akun Anda terdaftar sebagai Admin, silakan masuk melalui portal Admin.'
+        );
+        setIsLoading(false);
+        return;
       }
+
+      router.push(redirectTo);
       router.refresh();
     } catch (err: unknown) {
       console.error('Customer login error:', err);

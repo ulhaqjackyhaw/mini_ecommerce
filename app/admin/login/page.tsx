@@ -83,10 +83,10 @@ function LoginForm() {
       }
 
       if (!isAdmin) {
-        // Sign out jika bukan role admin
+        // Sign out jika bukan role admin (misal akun customer)
         await supabase.auth.signOut();
         setErrorMessage(
-          'Akses ditolak: Akun Anda belum memiliki role "admin" di sistem.'
+          'Akses ditolak. Akun Customer tidak dapat masuk ke portal Admin.'
         );
         setIsLoading(false);
         return;

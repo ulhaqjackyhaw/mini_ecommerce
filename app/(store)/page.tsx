@@ -1,5 +1,5 @@
 import React from 'react';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createAdminClient } from '@/lib/supabase/server';
 import CatalogView from '@/components/catalog/CatalogView';
 import type { Product, Category } from '@/types/database';
 
@@ -130,6 +130,7 @@ const FALLBACK_PRODUCTS: Product[] = [
 export default async function CatalogPage() {
   let products: Product[] = [];
   let categories: Category[] = [];
+  let soldCounts: Record<string, number> = {};
 
   try {
     const supabase = await createClient();
@@ -153,6 +154,26 @@ export default async function CatalogPage() {
     if (categoriesRes.data && categoriesRes.data.length > 0) {
       categories = categoriesRes.data as unknown as Category[];
     }
+
+    // Hitung total kuantitas produk yang telah terjual (tidak berstatus Cancelled)
+    try {
+      const adminSupabase = createAdminClient();
+      const { data: soldItems } = await adminSupabase
+        .from('order_items')
+        .select('product_id, quantity, orders!inner(status)')
+        .neq('orders.status', 'Cancelled');
+
+      if (soldItems) {
+        soldItems.forEach((item: any) => {
+          if (item.product_id) {
+            soldCounts[item.product_id] =
+              (soldCounts[item.product_id] || 0) + (item.quantity || 0);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching sold items:', err);
+    }
   } catch {
     // If Supabase not yet connected or configured, use fallback seed data
   }
@@ -165,6 +186,12 @@ export default async function CatalogPage() {
     categories = FALLBACK_CATEGORIES;
   }
 
-  return <CatalogView initialProducts={products} categories={categories} />;
+  return (
+    <CatalogView
+      initialProducts={products}
+      categories={categories}
+      soldCounts={soldCounts}
+    />
+  );
 }
 

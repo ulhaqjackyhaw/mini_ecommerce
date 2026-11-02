@@ -171,18 +171,6 @@ export default function Navbar() {
             </Link>
           )}
 
-          {/* Admin shortcut if not admin logged in */}
-          {userRole !== 'admin' && (
-            <Link
-              href="/admin/login"
-              prefetch={true}
-              className="hidden lg:inline-flex items-center gap-1.5 text-xs font-bold text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-            >
-              <ShieldCheck className="h-4 w-4" />
-              <span>Admin</span>
-            </Link>
-          )}
-
           {/* Mobile menu hamburger toggle */}
           <button
             type="button"
@@ -242,16 +230,6 @@ export default function Navbar() {
                   <span>Masuk Akun Customer</span>
                 </Link>
               )}
-
-              <Link
-                href="/admin/login"
-                prefetch={true}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-3 rounded-2xl px-4 py-2.5 text-xs font-semibold text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                <span>Portal Admin</span>
-              </Link>
             </div>
           </div>
         </div>
