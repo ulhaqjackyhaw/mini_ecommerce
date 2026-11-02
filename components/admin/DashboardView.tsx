@@ -532,8 +532,8 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
           </div>
         </div>
 
-        {/* Orders Table */}
-        <div className="overflow-x-auto">
+        {/* Orders Table (Desktop) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50/50 text-zinc-500 uppercase tracking-wider font-semibold dark:border-zinc-800 dark:bg-zinc-950/30">
@@ -672,6 +672,114 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Orders Mobile Card View */}
+        <div className="block md:hidden divide-y divide-zinc-100 dark:divide-zinc-800">
+          {filteredOrders.length === 0 ? (
+            <div className="py-8 text-center text-xs text-zinc-400">
+              Tidak ada transaksi yang cocok dengan filter.
+            </div>
+          ) : (
+            filteredOrders.map((order) => {
+              const isUpdating = isUpdatingStatus === order.id;
+
+              return (
+                <div key={order.id} className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDetailModal(order)}
+                      className="font-mono text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      {order.order_number}
+                    </button>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        order.status === 'Pending'
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'
+                          : order.status === 'Processing'
+                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300'
+                          : order.status === 'Completed'
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                          : 'bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300'
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-baseline justify-between text-xs">
+                    <div>
+                      <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                        {order.customer_name}
+                      </span>
+                      <span className="block text-[11px] text-zinc-400">
+                        {formatDate(order.created_at)}
+                      </span>
+                    </div>
+                    <span className="text-sm font-extrabold text-zinc-900 dark:text-zinc-50">
+                      {formatCurrency(order.total)}
+                    </span>
+                  </div>
+
+                  {/* Actions on mobile */}
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-800/60">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenDetailModal(order)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-xs text-zinc-700 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Detail</span>
+                    </button>
+
+                    {order.status === 'Pending' && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => handleUpdateStatus(order.id, 'Processing')}
+                          className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-700"
+                        >
+                          Proses
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => handleUpdateStatus(order.id, 'Cancelled')}
+                          className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                        >
+                          Batal
+                        </button>
+                      </>
+                    )}
+
+                    {order.status === 'Processing' && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => handleUpdateStatus(order.id, 'Completed')}
+                          className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                        >
+                          Selesai
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => handleUpdateStatus(order.id, 'Cancelled')}
+                          className="rounded-lg border border-red-200 px-2.5 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                        >
+                          Batal
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 

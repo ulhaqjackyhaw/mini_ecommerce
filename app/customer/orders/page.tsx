@@ -36,3 +36,4 @@ export default async function CustomerOrdersPage() {
 
   return <CustomerOrdersView initialOrders={orders} userId={userId} />;
 }
+

@@ -46,3 +46,4 @@ export default async function CustomerProfilePage() {
 
   return <CustomerProfileView initialProfile={profile} />;
 }
+

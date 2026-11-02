@@ -2,10 +2,12 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/components/cart/CartProvider';
 import { formatCurrency } from '@/lib/utils';
 import type { Product, Category } from '@/types/database';
-import { Search, Plus, Check, ShoppingBag, AlertCircle } from 'lucide-react';
+import { Search, Plus, Check, ShoppingBag, AlertCircle, Sparkles } from 'lucide-react';
+import PageTransition from '@/components/animations/PageTransition';
 
 interface CatalogViewProps {
   initialProducts: Product[];
@@ -59,74 +61,88 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
   };
 
   return (
-    <div className="w-full">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-sm text-white shadow-lg animate-bounce">
-          <AlertCircle className="h-5 w-5" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
+    <PageTransition className="w-full">
+      {/* Toast Notification with AnimatePresence */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-20 md:bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl bg-red-600 px-5 py-3 text-xs font-semibold text-white shadow-2xl"
+          >
+            <AlertCircle className="h-4 w-4" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero Header */}
-      <div className="bg-gradient-to-b from-blue-50 to-white px-4 py-8 text-center sm:py-12 dark:from-zinc-900 dark:to-zinc-950">
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
-          Katalog Produk Cepat & Praktis
-        </h1>
-        <p className="mx-auto mt-3 max-w-xl text-base text-zinc-600 sm:text-lg dark:text-zinc-400">
-          Pilih menu favorit Anda, tambahkan ke keranjang, dan checkout dalam hitungan detik tanpa perlu login.
-        </p>
-
-        {/* Search Input */}
-        <div className="mx-auto mt-6 max-w-md">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Cari makanan, minuman, camilan..."
-              className="w-full rounded-full border border-zinc-300 bg-white py-2.5 pl-11 pr-4 text-sm shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-400"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-              >
-                Reset
-              </button>
-            )}
+      <div className="relative overflow-hidden bg-gradient-to-b from-blue-50/70 via-white to-zinc-50/40 px-4 py-8 text-center sm:py-12 dark:from-zinc-900/60 dark:via-zinc-950 dark:to-zinc-950">
+        <div className="mx-auto max-w-2xl">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-100/80 px-3 py-1 text-[11px] font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 mb-3">
+            <Sparkles className="h-3 w-3" />
+            <span>Pesan Cepat • Tanpa Wajib Login</span>
           </div>
-        </div>
 
-        {/* Category Pills */}
-        <div className="mx-auto mt-6 flex max-w-2xl flex-wrap items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSelectedCategory('all')}
-            className={`rounded-full px-4 py-1.5 text-xs font-medium transition sm:text-sm ${
-              selectedCategory === 'all'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
-            }`}
-          >
-            Semua
-          </button>
-          {categories.map((cat) => (
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl dark:text-zinc-50">
+            Katalog Produk Cepat & Praktis
+          </h1>
+          <p className="mx-auto mt-2 max-w-xl text-xs text-zinc-600 sm:text-sm dark:text-zinc-400">
+            Pilih produk favorit Anda, tambahkan ke keranjang, dan dapatkan invoice digital secara instan.
+          </p>
+
+          {/* Search Input */}
+          <div className="mx-auto mt-6 max-w-md">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cari makanan, minuman, camilan..."
+                className="w-full rounded-2xl border border-zinc-300 bg-white py-3 pl-11 pr-4 text-xs shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-blue-400"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Category Pills */}
+          <div className="mx-auto mt-5 flex max-w-2xl flex-wrap items-center justify-center gap-1.5 sm:gap-2">
             <button
-              key={cat.id || cat.slug}
               type="button"
-              onClick={() => setSelectedCategory(cat.slug || cat.id)}
-              className={`rounded-full px-4 py-1.5 text-xs font-medium transition sm:text-sm ${
-                selectedCategory === cat.slug || selectedCategory === cat.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+              onClick={() => setSelectedCategory('all')}
+              className={`rounded-xl px-4 py-1.5 text-xs font-semibold transition ${
+                selectedCategory === 'all'
+                  ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                  : 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
               }`}
             >
-              {cat.name}
+              Semua
             </button>
-          ))}
+            {categories.map((cat) => (
+              <button
+                key={cat.id || cat.slug}
+                type="button"
+                onClick={() => setSelectedCategory(cat.slug || cat.id)}
+                className={`rounded-xl px-4 py-1.5 text-xs font-semibold transition ${
+                  selectedCategory === cat.slug || selectedCategory === cat.id
+                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                    : 'bg-white text-zinc-700 border border-zinc-200 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -138,8 +154,8 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
             <h3 className="mt-4 text-base font-semibold text-zinc-900 dark:text-zinc-100">
               Produk Tidak Ditemukan
             </h3>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-              Tidak ada produk yang cocok dengan pencarian atau kategori ini.
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Tidak ada produk yang cocok dengan pencarian &quot;{searchQuery}&quot;.
             </p>
             <button
               type="button"
@@ -147,7 +163,7 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                 setSearchQuery('');
                 setSelectedCategory('all');
               }}
-              className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-xs font-medium text-white transition hover:bg-blue-700"
+              className="mt-4 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
             >
               Tampilkan Semua Produk
             </button>
@@ -161,9 +177,10 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
               const isJustAdded = addedProductId === product.id;
 
               return (
-                <div
+                <motion.div
                   key={product.id}
-                  className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/90 bg-white shadow-xs transition hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
                 >
                   {/* Image & Badges */}
                   <div className="relative aspect-4/3 w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
@@ -173,7 +190,7 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                         alt={product.name}
                         fill
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover transition duration-300 group-hover:scale-105"
+                        className="object-cover transition duration-500 group-hover:scale-105"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center text-zinc-400">
@@ -183,7 +200,7 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
 
                     {/* Category pill on image */}
                     {product.category?.name && (
-                      <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-medium text-zinc-800 backdrop-blur shadow-sm dark:bg-zinc-900/90 dark:text-zinc-200">
+                      <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-0.5 text-[10px] font-bold text-zinc-800 backdrop-blur shadow-xs dark:bg-zinc-900/95 dark:text-zinc-200">
                         {product.category.name}
                       </span>
                     )}
@@ -191,15 +208,15 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                     {/* Stock status badge */}
                     <div className="absolute right-3 top-3">
                       {isOutOfStock ? (
-                        <span className="rounded-full bg-red-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+                        <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[10px] font-extrabold text-white shadow-xs">
                           Stok Habis
                         </span>
                       ) : product.stock_quantity <= 5 ? (
-                        <span className="rounded-full bg-amber-500 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
-                          Sisa {product.stock_quantity} unit
+                        <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[10px] font-extrabold text-white shadow-xs">
+                          Sisa {product.stock_quantity}
                         </span>
                       ) : (
-                        <span className="rounded-full bg-emerald-600/90 px-2.5 py-1 text-xs font-medium text-white backdrop-blur shadow-sm">
+                        <span className="rounded-full bg-emerald-600/90 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur shadow-xs">
                           Stok: {product.stock_quantity}
                         </span>
                       )}
@@ -209,7 +226,7 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                   {/* Product Details */}
                   <div className="flex flex-1 flex-col p-5">
                     <div className="flex-1">
-                      <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
+                      <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                         {product.name}
                       </h3>
                       {product.description && (
@@ -222,24 +239,27 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                     {/* Price and Add button */}
                     <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800">
                       <div>
-                        <span className="block text-xs text-zinc-400">Harga</span>
-                        <span className="text-base font-bold text-zinc-900 dark:text-zinc-50">
+                        <span className="block text-[10px] uppercase font-semibold text-zinc-400">
+                          Harga
+                        </span>
+                        <span className="text-base font-extrabold text-zinc-900 dark:text-zinc-50">
                           {formatCurrency(product.price)}
                         </span>
                       </div>
 
-                      <button
+                      <motion.button
+                        whileTap={{ scale: 0.94 }}
                         type="button"
                         onClick={() => handleAddToCart(product)}
                         disabled={isOutOfStock || isMaxInCart}
-                        className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-medium transition ${
+                        className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
                           isOutOfStock
                             ? 'cursor-not-allowed bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600'
                             : isMaxInCart
                             ? 'cursor-not-allowed bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
                             : isJustAdded
-                            ? 'bg-emerald-600 text-white'
-                            : 'bg-blue-600 text-white hover:bg-blue-700 active:scale-95'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
                         }`}
                       >
                         {isOutOfStock ? (
@@ -257,16 +277,15 @@ export default function CatalogView({ initialProducts, categories }: CatalogView
                             <span>{inCartQty > 0 ? `+1 (${inCartQty})` : 'Tambah'}</span>
                           </>
                         )}
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         )}
       </div>
-    </div>
+    </PageTransition>
   );
 }
-

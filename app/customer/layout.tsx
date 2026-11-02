@@ -13,3 +13,4 @@ export default function CustomerLayout({
 }) {
   return <CustomerLayoutClient>{children}</CustomerLayoutClient>;
 }
+

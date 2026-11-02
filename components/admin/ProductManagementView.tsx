@@ -304,8 +304,8 @@ export default function ProductManagementView({
           </div>
         </div>
 
-        {/* Product Table */}
-        <div className="overflow-x-auto">
+        {/* Product Table (Desktop) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50/50 text-zinc-500 uppercase tracking-wider font-semibold dark:border-zinc-800 dark:bg-zinc-950/30">
@@ -455,6 +455,78 @@ export default function ProductManagementView({
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Product Mobile Cards */}
+        <div className="block md:hidden divide-y divide-zinc-100 dark:divide-zinc-800">
+          {filteredProducts.length === 0 ? (
+            <div className="py-8 text-center text-xs text-zinc-400">
+              Tidak ada produk yang sesuai.
+            </div>
+          ) : (
+            filteredProducts.map((p) => (
+              <div key={p.id} className="p-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
+                    {p.image_url ? (
+                      <Image src={p.image_url} alt={p.name} fill className="object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-zinc-400">
+                        <ShoppingBag className="h-5 w-5" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-xs truncate text-zinc-900 dark:text-zinc-100">
+                      {p.name}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 font-mono">{p.slug}</p>
+                    <span className="inline-block mt-0.5 rounded bg-zinc-100 px-1.5 py-0.2 text-[10px] text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                      {p.category?.name || '-'}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="block text-xs font-extrabold text-zinc-900 dark:text-zinc-100">
+                      {formatCurrency(p.price)}
+                    </span>
+                    <span
+                      className={`inline-block mt-0.5 rounded-full px-2 py-0.2 text-[9px] font-bold ${
+                        p.stock_quantity === 0
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-emerald-100 text-emerald-700'
+                      }`}
+                    >
+                      Stok: {p.stock_quantity}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-zinc-100 dark:border-zinc-800/60 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => handleToggleActive(p)}
+                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${
+                      p.is_active
+                        ? 'bg-emerald-50 text-emerald-600'
+                        : 'bg-zinc-100 text-zinc-500'
+                    }`}
+                  >
+                    <Power className="h-3 w-3" />
+                    <span>{p.is_active ? 'Status: Aktif' : 'Status: Nonaktif'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditModal(p)}
+                    className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 dark:border-zinc-700 dark:text-zinc-300"
+                  >
+                    <Edit className="h-3.5 w-3.5" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
