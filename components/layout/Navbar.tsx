@@ -25,27 +25,43 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setIsLoggedIn(true);
-        (supabase as any)
-          .from('admin_profiles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single()
-          .then(({ data }: any) => {
-            if (data?.role === 'admin') {
-              setUserRole('admin');
-            } else {
-              setUserRole('customer');
-            }
-          });
-      } else {
-        setIsLoggedIn(false);
-        setUserRole(null);
-      }
-    });
+    try {
+      const supabase = createClient();
+      supabase.auth
+        .getUser()
+        .then(({ data }) => {
+          const user = data?.user;
+          if (user) {
+            setIsLoggedIn(true);
+            (supabase as any)
+              .from('admin_profiles')
+              .select('role')
+              .eq('user_id', user.id)
+              .single()
+              .then(({ data: profileData }: any) => {
+                if (profileData?.role === 'admin') {
+                  setUserRole('admin');
+                } else {
+                  setUserRole('customer');
+                }
+              })
+              .catch(() => {
+                setUserRole('customer');
+              });
+          } else {
+            setIsLoggedIn(false);
+            setUserRole(null);
+          }
+        })
+        .catch(() => {
+          setIsLoggedIn(false);
+          setUserRole(null);
+        });
+    } catch {
+      // Safe fallback
+      setIsLoggedIn(false);
+      setUserRole(null);
+    }
   }, [pathname]);
 
   const isActive = (path: string) => {

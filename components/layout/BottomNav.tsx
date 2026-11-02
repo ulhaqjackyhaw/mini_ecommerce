@@ -8,10 +8,9 @@ import { createClient } from '@/lib/supabase/client';
 import {
   Store,
   ShoppingBag,
-  Search,
+  Package,
   User,
   ShieldCheck,
-  Package,
 } from 'lucide-react';
 
 export default function BottomNav() {
@@ -21,54 +20,72 @@ export default function BottomNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setIsLoggedIn(true);
-        // Check admin
-        (supabase as any)
-          .from('admin_profiles')
-          .select('role')
-          .eq('user_id', user.id)
-          .single()
-          .then(({ data }: any) => {
-            if (data?.role === 'admin') {
-              setUserRole('admin');
-            } else {
-              setUserRole('customer');
-            }
-          });
-      } else {
-        setIsLoggedIn(false);
-        setUserRole(null);
-      }
-    });
+    try {
+      const supabase = createClient();
+      supabase.auth
+        .getUser()
+        .then(({ data }) => {
+          const user = data?.user;
+          if (user) {
+            setIsLoggedIn(true);
+            (supabase as any)
+              .from('admin_profiles')
+              .select('role')
+              .eq('user_id', user.id)
+              .single()
+              .then(({ data: profileData }: any) => {
+                if (profileData?.role === 'admin') {
+                  setUserRole('admin');
+                } else {
+                  setUserRole('customer');
+                }
+              })
+              .catch(() => {
+                setUserRole('customer');
+              });
+          } else {
+            setIsLoggedIn(false);
+            setUserRole(null);
+          }
+        })
+        .catch(() => {
+          setIsLoggedIn(false);
+          setUserRole(null);
+        });
+    } catch {
+      setIsLoggedIn(false);
+      setUserRole(null);
+    }
   }, [pathname]);
 
-  // Sembunyikan bottom nav pada mode cetak
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 block md:hidden border-t border-zinc-200/80 bg-white/95 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/95 print:hidden">
+    <nav
+      aria-label="Navigasi bawah mobile"
+      className="fixed bottom-0 left-0 right-0 z-50 block md:hidden border-t border-zinc-200/90 bg-white/95 backdrop-blur-lg dark:border-zinc-800/90 dark:bg-zinc-950/95 print:hidden"
+    >
       <div className="flex h-16 items-center justify-around px-2">
         {/* Katalog */}
         <Link
           href="/"
-          className={`flex flex-col items-center justify-center py-1 transition ${
+          prefetch={true}
+          className={`flex flex-1 flex-col items-center justify-center py-1 transition-colors ${
             pathname === '/'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+              ? 'text-blue-600 dark:text-blue-400 font-bold'
+              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium'
           }`}
         >
           <Store className="h-5 w-5" />
-          <span className="mt-1 text-[10px] font-semibold">Katalog</span>
+          <span className="mt-1 text-[10px]">Katalog</span>
         </Link>
 
         {/* Keranjang */}
         <Link
           href="/cart"
-          className={`relative flex flex-col items-center justify-center py-1 transition ${
+          prefetch={true}
+          className={`relative flex flex-1 flex-col items-center justify-center py-1 transition-colors ${
             pathname === '/cart'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+              ? 'text-blue-600 dark:text-blue-400 font-bold'
+              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium'
           }`}
         >
           <div className="relative">
@@ -79,20 +96,21 @@ export default function BottomNav() {
               </span>
             )}
           </div>
-          <span className="mt-1 text-[10px] font-semibold">Keranjang</span>
+          <span className="mt-1 text-[10px]">Keranjang</span>
         </Link>
 
         {/* Lacak Pesanan / Pesanan Saya */}
         <Link
           href={isLoggedIn ? '/customer/orders' : '/track-order'}
-          className={`flex flex-col items-center justify-center py-1 transition ${
+          prefetch={true}
+          className={`flex flex-1 flex-col items-center justify-center py-1 transition-colors ${
             pathname.startsWith('/track-order') || pathname.startsWith('/customer/orders')
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+              ? 'text-blue-600 dark:text-blue-400 font-bold'
+              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium'
           }`}
         >
           <Package className="h-5 w-5" />
-          <span className="mt-1 text-[10px] font-semibold">
+          <span className="mt-1 text-[10px]">
             {isLoggedIn ? 'Pesanan' : 'Lacak'}
           </span>
         </Link>
@@ -106,13 +124,14 @@ export default function BottomNav() {
               ? '/customer/profile'
               : '/login'
           }
-          className={`flex flex-col items-center justify-center py-1 transition ${
+          prefetch={true}
+          className={`flex flex-1 flex-col items-center justify-center py-1 transition-colors ${
             pathname.startsWith('/customer') ||
             pathname.startsWith('/admin') ||
             pathname === '/login' ||
             pathname === '/register'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'
+              ? 'text-blue-600 dark:text-blue-400 font-bold'
+              : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 font-medium'
           }`}
         >
           {userRole === 'admin' ? (
@@ -120,12 +139,11 @@ export default function BottomNav() {
           ) : (
             <User className="h-5 w-5" />
           )}
-          <span className="mt-1 text-[10px] font-semibold">
+          <span className="mt-1 text-[10px]">
             {userRole === 'admin' ? 'Admin' : isLoggedIn ? 'Akun' : 'Masuk'}
           </span>
         </Link>
       </div>
-    </div>
+    </nav>
   );
 }
-
