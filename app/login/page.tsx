@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import {
-  User,
   Lock,
   Mail,
   ArrowRight,
@@ -13,12 +12,14 @@ import {
   AlertCircle,
   Loader2,
   Package,
+  CheckCircle2,
 } from 'lucide-react';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') || '/customer/orders';
+  const justRegistered = searchParams.get('registered') === 'true';
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -34,7 +35,7 @@ function LoginContent() {
       const supabase = createClient();
 
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -45,13 +46,28 @@ function LoginContent() {
       }
 
       // Cek apakah user adalah admin
+      let isAdmin = false;
       const { data: adminProfile } = await (supabase as any)
         .from('admin_profiles')
         .select('role')
         .eq('user_id', data.user.id)
-        .single();
+        .maybeSingle();
 
       if (adminProfile?.role === 'admin') {
+        isAdmin = true;
+      } else {
+        const { data: userProfile } = await (supabase as any)
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .maybeSingle();
+
+        if (userProfile?.role === 'admin') {
+          isAdmin = true;
+        }
+      }
+
+      if (isAdmin) {
         router.push('/admin/dashboard');
       } else {
         router.push(redirectTo);
@@ -86,6 +102,13 @@ function LoginContent() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+          {justRegistered && !errorMessage && (
+            <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
+              <span>Pendaftaran akun berhasil! Silakan masuk dengan kata sandi Anda.</span>
+            </div>
+          )}
+
           {errorMessage && (
             <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-xs font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300">
               <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
@@ -206,4 +229,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-

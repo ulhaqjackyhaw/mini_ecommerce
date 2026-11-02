@@ -35,30 +35,58 @@ function LoginForm() {
       // 1. Sign in dengan Supabase Auth
       const { data: authData, error: authError } =
         await supabase.auth.signInWithPassword({
-          email: email.trim(),
+          email: email.trim().toLowerCase(),
           password,
         });
 
       if (authError || !authData.user) {
         setErrorMessage(
-          authError?.message || 'Email atau kata sandi tidak valid.'
+          authError?.message || 'Email atau kata sandi tidak sesuai.'
         );
         setIsLoading(false);
         return;
       }
 
-      // 2. Verifikasi hak akses admin di tabel admin_profiles
-      const { data: profile, error: profileError } = await (supabase as any)
+      // 2. Verifikasi hak akses admin di tabel admin_profiles atau profiles
+      let isAdmin = false;
+
+      // Cek di admin_profiles
+      const { data: adminProfile } = await (supabase as any)
         .from('admin_profiles')
         .select('role')
         .eq('user_id', authData.user.id)
-        .single();
+        .maybeSingle();
 
-      if (profileError || profile?.role !== 'admin') {
-        // Sign out segera jika bukan role admin
+      if (adminProfile?.role === 'admin') {
+        isAdmin = true;
+      }
+
+      // Fallback: Cek di profiles jika admin_profiles belum terisi
+      if (!isAdmin) {
+        const { data: userProfile } = await (supabase as any)
+          .from('profiles')
+          .select('role')
+          .eq('id', authData.user.id)
+          .maybeSingle();
+
+        if (userProfile?.role === 'admin') {
+          isAdmin = true;
+          // Otomatis sinkronkan ke admin_profiles agar konsisten
+          try {
+            await (supabase as any)
+              .from('admin_profiles')
+              .upsert({ user_id: authData.user.id, role: 'admin' });
+          } catch {
+            // Ignore background sync error
+          }
+        }
+      }
+
+      if (!isAdmin) {
+        // Sign out jika bukan role admin
         await supabase.auth.signOut();
         setErrorMessage(
-          'Akses ditolak: Akun Anda berhasil login namun belum terdaftar sebagai admin di tabel admin_profiles.'
+          'Akses ditolak: Akun Anda belum memiliki role "admin" di sistem.'
         );
         setIsLoading(false);
         return;
@@ -177,13 +205,10 @@ function LoginForm() {
             <div className="flex items-start gap-2">
               <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
               <div>
-                <strong className="font-semibold">Info Registrasi Admin:</strong>
+                <strong className="font-semibold">Info Akun Admin:</strong>
                 <p className="mt-1 text-[11px] leading-relaxed text-blue-800 dark:text-blue-400">
-                  Buat akun melalui Supabase Auth Dashboard, lalu jalankan perintah SQL berikut di Supabase SQL Editor:
+                  Pastikan akun admin Anda sudah terdaftar di Supabase Auth dan memiliki entri di tabel <code>admin_profiles</code> atau <code>profiles</code> (role: <code>admin</code>).
                 </p>
-                <code className="mt-1 block rounded bg-white/80 p-1.5 font-mono text-[10px] text-blue-950 dark:bg-black/50 dark:text-blue-200">
-                  INSERT INTO public.admin_profiles(user_id, role) VALUES (&apos;&lt;AUTH_USER_UUID&gt;&apos;, &apos;admin&apos;);
-                </code>
               </div>
             </div>
           </div>
@@ -206,4 +231,3 @@ export default function AdminLoginPage() {
     </Suspense>
   );
 }
-

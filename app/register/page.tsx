@@ -10,7 +10,6 @@ import {
   Mail,
   Phone,
   MapPin,
-  ArrowRight,
   AlertCircle,
   Loader2,
   Package,
@@ -40,44 +39,44 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-
-      // 1. Daftarkan akun auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            full_name: fullName.trim(),
-            phone: phone.trim(),
-          },
-        },
+      // 1. Panggil API registrasi server (bebas rate-limit email)
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          address: address.trim() || null,
+        }),
       });
 
-      if (authError || !authData.user) {
-        setErrorMessage(authError?.message || 'Gagal mendaftarkan akun.');
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setErrorMessage(data.error || 'Gagal mendaftarkan akun.');
         setIsLoading(false);
         return;
       }
 
-      // 2. Simpan profil customer ke tabel profiles
-      try {
-        await (supabase as any).from('profiles').insert({
-          id: authData.user.id,
-          role: 'customer',
-          full_name: fullName.trim(),
-          phone: phone.trim(),
-          address: address.trim() || null,
-        });
-      } catch (profErr) {
-        console.warn('Profile insert fallback:', profErr);
-      }
+      // 2. Langsung sign in di client agar sesi aktif di browser
+      const supabase = createClient();
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-      router.push('/customer/orders');
-      router.refresh();
+      if (signInError) {
+        // Jika sign in client tertunda, arahkan ke login dengan pesan sukses
+        router.push('/login?registered=true');
+      } else {
+        router.push('/customer/orders');
+        router.refresh();
+      }
     } catch (err: unknown) {
       console.error('Registration error:', err);
-      setErrorMessage('Terjadi kendala saat registrasi akun.');
+      setErrorMessage('Terjadi kendala jaringan saat mendaftarkan akun.');
       setIsLoading(false);
     }
   };
@@ -266,4 +265,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
