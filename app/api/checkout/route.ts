@@ -17,9 +17,11 @@ const checkoutSchema = z.object({
   customer_address: z
     .string()
     .trim()
-    .max(500, 'Alamat atau catatan maksimal 500 karakter.')
+    .max(1000, 'Alamat atau catatan maksimal 1000 karakter.')
     .optional()
     .or(z.literal('')),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
   items: z
     .array(
       z.object({
@@ -61,10 +63,23 @@ export async function POST(request: Request) {
       customer_name,
       customer_phone,
       customer_address,
+      latitude,
+      longitude,
       items,
       idempotency_key,
       user_id,
     } = validationResult.data;
+
+    // Sertakan link Google Maps pada teks alamat jika koordinat tersedia
+    let formattedAddress = customer_address || '';
+    if (latitude != null && longitude != null) {
+      const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+      if (!formattedAddress.includes('maps.google.com') && !formattedAddress.includes('google.com/maps')) {
+        formattedAddress = formattedAddress
+          ? `${formattedAddress}\n📍 Titik Lokasi: ${mapsUrl}`
+          : `📍 Titik Lokasi: ${mapsUrl}`;
+      }
+    }
 
     // 2. Inisialisasi Supabase client
     const supabase = await createClient();
@@ -73,7 +88,7 @@ export async function POST(request: Request) {
     const { data: rawData, error } = await (supabase as any).rpc('create_guest_order', {
       p_customer_name: customer_name,
       p_customer_phone: customer_phone,
-      p_customer_address: customer_address || null,
+      p_customer_address: formattedAddress || null,
       p_items: items,
       p_idempotency_key: idempotency_key || null,
       p_user_id: user_id || null,
@@ -101,15 +116,24 @@ export async function POST(request: Request) {
       currency: string;
     };
 
-    // Pastikan user_id tersambung jika customer sedang login
-    if (user_id && data.order_id) {
-      try {
-        await (supabase as any)
-          .from('orders')
-          .update({ user_id: user_id })
-          .eq('id', data.order_id);
-      } catch (linkErr) {
-        console.warn('Could not link order to user_id:', linkErr);
+    // Pastikan user_id dan koordinat geolocation tersimpan jika tersedia
+    if (data.order_id) {
+      const updatePayload: Record<string, any> = {};
+      if (user_id) updatePayload.user_id = user_id;
+      if (latitude != null && longitude != null) {
+        updatePayload.latitude = latitude;
+        updatePayload.longitude = longitude;
+      }
+
+      if (Object.keys(updatePayload).length > 0) {
+        try {
+          await (supabase as any)
+            .from('orders')
+            .update(updatePayload)
+            .eq('id', data.order_id);
+        } catch (linkErr) {
+          console.warn('Could not update order metadata:', linkErr);
+        }
       }
     }
 

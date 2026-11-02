@@ -24,6 +24,8 @@ import {
   RefreshCw,
   Calendar,
   MessageCircle,
+  MapPin,
+  ExternalLink,
 } from 'lucide-react';
 
 function WhatsAppIcon({ className = 'h-5 w-5' }: { className?: string }) {
@@ -64,6 +66,17 @@ function generateWhatsAppBillingMessage(order: OrderWithItems): string {
       ? order.customer_address.trim()
       : 'Ambil di Tempat / Tanpa Alamat Khusus';
 
+  // Format link Google Maps jika koordinat tersedia
+  let mapsLine = '';
+  if (order.latitude != null && order.longitude != null) {
+    mapsLine = `\n🗺️ *Titik Lokasi Maps:* https://www.google.com/maps?q=${order.latitude},${order.longitude}`;
+  } else if (order.customer_address && (order.customer_address.includes('google.com/maps') || order.customer_address.includes('maps.google.com'))) {
+    const match = order.customer_address.match(/https:\/\/(www\.)?google\.com\/maps[^\s]+/);
+    if (match) {
+      mapsLine = `\n🗺️ *Titik Lokasi Maps:* ${match[0]}`;
+    }
+  }
+
   const message = `Halo Kak *${order.customer_name}*, terima kasih telah memesan di *AmaraStore*! 🙏✨
 
 Kami ingin melakukan konfirmasi & verifikasi pesanan Anda:
@@ -74,8 +87,8 @@ Kami ingin melakukan konfirmasi & verifikasi pesanan Anda:
 ${itemsText}
 
 📍 *Alamat / Catatan Pengiriman:*
-${addressText}
-_(Mohon verifikasi apakah alamat pengiriman di atas sudah benar)_
+${addressText}${mapsLine}
+_(Mohon verifikasi apakah alamat pengiriman dan titik peta di atas sudah benar)_
 
 💰 *TOTAL PEMBAYARAN:* *${formatCurrency(order.total)}*
 
@@ -1095,6 +1108,52 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                     {activeModalOrder.customer_address || '-'}
                   </p>
                 </div>
+
+                {/* Google Maps Pinpoint Integration */}
+                {(() => {
+                  const hasCoords = activeModalOrder.latitude != null && activeModalOrder.longitude != null;
+                  let googleMapsUrl = hasCoords
+                    ? `https://www.google.com/maps?q=${activeModalOrder.latitude},${activeModalOrder.longitude}`
+                    : null;
+
+                  if (!googleMapsUrl && activeModalOrder.customer_address) {
+                    const match = activeModalOrder.customer_address.match(/https:\/\/(www\.)?google\.com\/maps[^\s]+/);
+                    if (match) googleMapsUrl = match[0];
+                  }
+
+                  if (!googleMapsUrl) return null;
+
+                  return (
+                    <div className="col-span-1 sm:col-span-2 pt-2.5 border-t border-zinc-200/70 dark:border-zinc-700/60">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 font-medium text-[11px]">
+                          <MapPin className="h-3.5 w-3.5 text-red-500" />
+                          <span>Titik Lokasi Pengiriman Tersedia</span>
+                        </div>
+                        <a
+                          href={googleMapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300 transition"
+                        >
+                          <span>🗺️ Buka Titik Pengiriman di Google Maps</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+
+                      {hasCoords && (
+                        <div className="h-36 w-full rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-xs">
+                          <iframe
+                            title="Preview Peta Pengiriman"
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${activeModalOrder.longitude! - 0.005}%2C${activeModalOrder.latitude! - 0.005}%2C${activeModalOrder.longitude! + 0.005}%2C${activeModalOrder.latitude! + 0.005}&layer=mapnik&marker=${activeModalOrder.latitude}%2C${activeModalOrder.longitude}`}
+                            className="w-full h-full border-none"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Items Table */}

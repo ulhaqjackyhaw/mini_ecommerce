@@ -18,6 +18,7 @@ import {
   Phone,
   MapPin,
 } from 'lucide-react';
+import DynamicLocationPicker from '@/components/map/DynamicLocationPicker';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -26,6 +27,8 @@ export default function CheckoutPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [customerAddress, setCustomerAddress] = useState('');
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
   const [loggedInUserEmail, setLoggedInUserEmail] = useState<string | null>(null);
 
@@ -79,6 +82,9 @@ export default function CheckoutPage() {
           if (json.data.full_name) setCustomerName(json.data.full_name);
           if (json.data.phone) setCustomerPhone(json.data.phone);
           if (json.data.address) setCustomerAddress(json.data.address);
+          if (json.data.latitude && json.data.longitude) {
+            setCoordinates({ lat: json.data.latitude, lng: json.data.longitude });
+          }
         }
       })
       .catch(() => {});
@@ -139,6 +145,8 @@ export default function CheckoutPage() {
         customer_name: customerName.trim(),
         customer_phone: customerPhone.trim(),
         customer_address: customerAddress.trim() || undefined,
+        latitude: coordinates?.lat || undefined,
+        longitude: coordinates?.lng || undefined,
         items: items.map((i) => ({
           product_id: i.id,
           quantity: i.quantity,
@@ -275,13 +283,76 @@ export default function CheckoutPage() {
 
                 {/* Alamat Pengiriman / Catatan */}
                 <div>
-                  <label
-                    htmlFor="customer_address"
-                    className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
-                  >
-                    Alamat Pengiriman / Catatan{' '}
-                    <span className="text-zinc-400 font-normal lowercase">(opsional)</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label
+                      htmlFor="customer_address"
+                      className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
+                    >
+                      Alamat Pengiriman / Catatan{' '}
+                      <span className="text-zinc-400 font-normal lowercase">(opsional)</span>
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowMapPicker(!showMapPicker)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/80 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 transition"
+                    >
+                      <MapPin className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      <span>{showMapPicker ? 'Tutup Peta' : '📍 Pilih Titik di Peta'}</span>
+                    </button>
+                  </div>
+
+                  {coordinates && !showMapPicker && (
+                    <div className="mb-2 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/80 px-3 py-1.5 text-xs text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      <span className="flex items-center gap-1.5 truncate">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                        <span className="font-mono text-[11px] truncate">
+                          Titik terpilih: {coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)}
+                        </span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMapPicker(true)}
+                        className="text-[11px] font-semibold underline ml-2 shrink-0"
+                      >
+                        Ubah
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Interactive Map Picker Section */}
+                  {showMapPicker && (
+                    <div className="mb-3 rounded-2xl border border-zinc-200/90 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/60 animate-in fade-in duration-200">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                          Titik Koordinat Pengiriman
+                        </span>
+                        <span className="text-[11px] text-zinc-400">
+                          Geser pin untuk auto-fill alamat
+                        </span>
+                      </div>
+                      <DynamicLocationPicker
+                        initialLat={coordinates?.lat}
+                        initialLng={coordinates?.lng}
+                        onLocationSelect={({ lat, lng, address }) => {
+                          setCoordinates({ lat, lng });
+                          if (address) {
+                            setCustomerAddress((prev) => {
+                              if (!prev.trim()) return address;
+                              // Jika sudah ada catatan patokan, pertahankan catatan manual user
+                              const hasNotes = prev.includes('(Catatan:');
+                              if (hasNotes) {
+                                const noteMatch = prev.match(/\(Catatan:.*?\)/);
+                                return `${address}\n${noteMatch ? noteMatch[0] : ''}`;
+                              }
+                              return address;
+                            });
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+
                   <div className="relative mt-1">
                     <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
                     <textarea
@@ -289,11 +360,19 @@ export default function CheckoutPage() {
                       rows={3}
                       value={customerAddress}
                       onChange={(e) => setCustomerAddress(e.target.value)}
-                      placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau catatan 'Es sedikit'"
+                      placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau patokan 'Pagar hitam, es sedikit'..."
                       disabled={isSubmitting}
                       className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-3 text-xs sm:text-sm shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                     />
                   </div>
+
+                  {/* Indicator if Pinpoint is selected */}
+                  {coordinates && (
+                    <div className="mt-2 flex items-center gap-2 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      <span>Titik lokasi maps tersimpan ({coordinates.lat.toFixed(5)}, {coordinates.lng.toFixed(5)})</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Tombol Buat Pesanan */}

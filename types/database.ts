@@ -48,6 +48,8 @@ export interface Order {
   customer_name: string;
   customer_phone: string;
   customer_address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   status: OrderStatus;
   subtotal: number;
   total: number;
@@ -88,6 +90,8 @@ export interface CreateGuestOrderPayload {
   customer_name: string;
   customer_phone: string;
   customer_address?: string;
+  latitude?: number | null;
+  longitude?: number | null;
   items: CheckoutItemPayload[];
   idempotency_key?: string;
   user_id?: string | null;
