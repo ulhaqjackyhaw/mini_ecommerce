@@ -201,17 +201,8 @@ function LoginForm() {
           </form>
 
           {/* Setup note */}
-          <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-3.5 text-xs text-blue-900 dark:border-blue-900/40 dark:bg-blue-950/20 dark:text-blue-300">
-            <div className="flex items-start gap-2">
-              <Info className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
-              <div>
-                <strong className="font-semibold">Info Akun Admin:</strong>
-                <p className="mt-1 text-[11px] leading-relaxed text-blue-800 dark:text-blue-400">
-                  Pastikan akun admin Anda sudah terdaftar di Supabase Auth dan memiliki entri di tabel <code>admin_profiles</code> atau <code>profiles</code> (role: <code>admin</code>).
-                </p>
-              </div>
-            </div>
-          </div>
+
+
         </div>
       </div>
     </div>
