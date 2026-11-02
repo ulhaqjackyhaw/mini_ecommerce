@@ -13,8 +13,6 @@ import {
   ArrowLeft,
   Search,
   Truck,
-  MapPin,
-  ExternalLink,
 } from 'lucide-react';
 
 interface InvoiceViewProps {
@@ -159,31 +157,6 @@ export default function InvoiceView({ order }: InvoiceViewProps) {
               <p className="mt-1 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap leading-relaxed">
                 {order.customer_address || '-'}
               </p>
-              {(() => {
-                const hasCoords = (order as any).latitude != null && (order as any).longitude != null;
-                let mapsUrl = hasCoords
-                  ? `https://www.google.com/maps?q=${(order as any).latitude},${(order as any).longitude}`
-                  : null;
-                if (!mapsUrl && order.customer_address) {
-                  const match = order.customer_address.match(/https:\/\/(www\.)?google\.com\/maps[^\s]+/);
-                  if (match) mapsUrl = match[0];
-                }
-                if (!mapsUrl) return null;
-                return (
-                  <div className="mt-2.5 print:hidden">
-                    <a
-                      href={mapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:underline"
-                    >
-                      <MapPin className="h-3.5 w-3.5 text-blue-500" />
-                      <span>Buka Titik Pengiriman di Google Maps</span>
-                      <ExternalLink className="h-3 w-3 opacity-70" />
-                    </a>
-                  </div>
-                );
-              })()}
             </div>
           </div>
 

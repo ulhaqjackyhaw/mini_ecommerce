@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import DynamicLocationPicker from '@/components/map/DynamicLocationPicker';
 import {
   User,
   Phone,
@@ -33,7 +32,6 @@ export default function CustomerProfileView({
   const [fullName, setFullName] = useState(initialProfile.full_name || '');
   const [phone, setPhone] = useState(initialProfile.phone || '');
   const [address, setAddress] = useState(initialProfile.address || '');
-  const [showMapPicker, setShowMapPicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -198,34 +196,12 @@ export default function CustomerProfileView({
 
               {/* Alamat Default */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label
-                    htmlFor="address"
-                    className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
-                  >
-                    Alamat Pengiriman Default
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setShowMapPicker(!showMapPicker)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50/80 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300 transition"
-                  >
-                    <MapPin className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
-                    <span>{showMapPicker ? 'Tutup Peta' : '📍 Pilih Titik di Peta'}</span>
-                  </button>
-                </div>
-
-                {showMapPicker && (
-                  <div className="mb-3 rounded-2xl border border-zinc-200/90 bg-zinc-50/70 p-3.5 dark:border-zinc-800 dark:bg-zinc-900/60 animate-in fade-in duration-200">
-                    <DynamicLocationPicker
-                      onLocationSelect={({ address: geoAddress }) => {
-                        if (geoAddress) {
-                          setAddress(geoAddress);
-                        }
-                      }}
-                    />
-                  </div>
-                )}
+                <label
+                  htmlFor="address"
+                  className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400 mb-1"
+                >
+                  Alamat Pengiriman Default
+                </label>
 
                 <div className="relative mt-1">
                   <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
