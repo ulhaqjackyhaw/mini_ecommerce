@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -8,6 +9,7 @@ import { useCart } from '@/components/cart/CartProvider';
 import { formatCurrency } from '@/lib/utils';
 import {
   ArrowLeft,
+  ArrowRight,
   ShoppingBag,
   CheckCircle2,
   AlertCircle,
@@ -29,6 +31,42 @@ export default function CheckoutPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Success Modal State & Auto-redirect Countdown
+  const [isMounted, setIsMounted] = useState(false);
+  const [successOrder, setSuccessOrder] = useState<{
+    orderNumber: string;
+    total: number;
+    customerName: string;
+  } | null>(null);
+  const [countdown, setCountdown] = useState<number>(3);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Auto-redirect countdown saat pesanan berhasil dibuat
+  useEffect(() => {
+    if (!successOrder) return;
+    document.body.style.overflow = 'hidden';
+
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          document.body.style.overflow = '';
+          router.push(`/invoice/${successOrder.orderNumber}`);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      document.body.style.overflow = '';
+    };
+  }, [successOrder, router]);
 
   // Auto-fill dari profil customer jika sedang login
   React.useEffect(() => {
@@ -54,7 +92,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (items.length === 0) {
+  if (items.length === 0 && !successOrder) {
     return (
       <div className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400 dark:bg-zinc-800">
@@ -125,8 +163,14 @@ export default function CheckoutPage() {
         return;
       }
 
+      // Tampilkan popup sukses membuat pesanan terlebih dahulu sebelum redirect
+      setSuccessOrder({
+        orderNumber: data.data.order_number,
+        total: total,
+        customerName: customerName.trim(),
+      });
       clearCart();
-      router.push(`/invoice/${data.data.order_number}`);
+      setIsSubmitting(false);
     } catch (err: any) {
       console.error('Checkout submit error:', err);
       setErrorMessage('Terjadi gangguan jaringan. Silakan periksa koneksi Anda.');
@@ -354,6 +398,80 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* Pop Up Berhasil Membuat Pesanan (Mounted via Portal) */}
+      {isMounted && successOrder && createPortal(
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-zinc-200/90 bg-white p-6 sm:p-8 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 text-center animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Badge Icon */}
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 mb-5 ring-8 ring-emerald-50/70 dark:ring-emerald-950/20">
+              <CheckCircle2 className="h-9 w-9 stroke-[2.25]" />
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+              Pesanan Berhasil Dibuat!
+            </h3>
+            <p className="mt-1.5 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+              Terima kasih, pesanan Anda telah tersimpan dan siap diproses oleh toko.
+            </p>
+
+            {/* Order Details Card */}
+            <div className="mt-5 rounded-xl border border-zinc-200/80 bg-zinc-50/70 p-4 text-left space-y-2 dark:border-zinc-800 dark:bg-zinc-950/50 text-xs">
+              <div className="flex justify-between items-center text-zinc-500 dark:text-zinc-400">
+                <span>No. Pesanan</span>
+                <span className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                  {successOrder.orderNumber}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-zinc-500 dark:text-zinc-400">
+                <span>Nama Pemesan</span>
+                <span className="font-medium text-zinc-800 dark:text-zinc-200">
+                  {successOrder.customerName}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-t border-zinc-200/60 pt-2 dark:border-zinc-800 text-sm font-semibold">
+                <span className="text-zinc-900 dark:text-zinc-100">Total Pembayaran</span>
+                <span className="font-mono font-black text-zinc-900 dark:text-zinc-50">
+                  {formatCurrency(successOrder.total)}
+                </span>
+              </div>
+            </div>
+
+            {/* Auto-redirect countdown status */}
+            <div className="mt-5 flex items-center justify-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-medium">
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-600 dark:text-zinc-300" />
+              <span>
+                Mengarahkan ke invoice digital dalam{' '}
+                <strong className="font-mono font-bold text-zinc-900 dark:text-zinc-100">
+                  {countdown} detik
+                </strong>
+                ...
+              </span>
+            </div>
+
+            {/* Instant CTA Button */}
+            <button
+              type="button"
+              onClick={() => {
+                document.body.style.overflow = '';
+                router.push(`/invoice/${successOrder.orderNumber}`);
+              }}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-3 px-4 text-xs sm:text-sm font-bold text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 shadow-sm"
+            >
+              <span>Buka Invoice Sekarang</span>
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
