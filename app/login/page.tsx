@@ -200,21 +200,7 @@ function LoginContent() {
               </Link>
             </p>
 
-            <div className="border-t border-zinc-100 pt-3 dark:border-zinc-800 flex items-center justify-between text-zinc-400">
-              <Link
-                href="/"
-                className="hover:text-zinc-700 dark:hover:text-zinc-300"
-              >
-                ← Kembali Belanja (Guest)
-              </Link>
-              <Link
-                href="/admin/login"
-                className="inline-flex items-center gap-1 font-medium hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                <ShieldCheck className="h-3.5 w-3.5" />
-                <span>Portal Admin</span>
-              </Link>
-            </div>
+
           </div>
         </div>
       </div>
