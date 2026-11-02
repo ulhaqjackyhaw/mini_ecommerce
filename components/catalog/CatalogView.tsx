@@ -306,15 +306,10 @@ export default function CatalogView({
 
                     {/* Price & Action */}
                     <div className="mt-4 pt-3.5 border-t border-zinc-100 dark:border-zinc-800/80">
-                      <div className="flex items-baseline justify-between mb-2.5">
+                      <div className="mb-2.5">
                         <span className="text-sm sm:text-lg lg:text-xl font-black font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
                           {formatCurrency(product.price)}
                         </span>
-                        {inCartQty > 0 && (
-                          <span className="text-xs font-semibold text-zinc-500 font-mono tabular-nums">
-                            {inCartQty} di troli
-                          </span>
-                        )}
                       </div>
 
                       <div onClick={(e) => e.stopPropagation()}>
@@ -331,19 +326,47 @@ export default function CatalogView({
                             <button
                               type="button"
                               onClick={() => handleDecreaseQuantity(product.id, inCartQty)}
-                              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-white text-zinc-700 shadow-xs hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 transition"
+                              className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-white text-zinc-700 shadow-xs hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200 transition shrink-0"
                               aria-label="Kurangi"
                             >
                               <Minus className="h-3.5 w-3.5" />
                             </button>
-                            <span className="text-xs sm:text-sm font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
-                              {inCartQty}
-                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              max={product.stock_quantity}
+                              value={inCartQty}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (isNaN(val)) return;
+                                if (val <= 0) return;
+                                if (val > product.stock_quantity) {
+                                  setToastAlert({
+                                    type: 'warning',
+                                    title: 'Batas Stok',
+                                    message: `Maksimal pembelian untuk ${product.name} adalah ${product.stock_quantity} unit.`,
+                                  });
+                                  updateQuantity(product.id, product.stock_quantity);
+                                } else {
+                                  updateQuantity(product.id, val);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (isNaN(val) || val < 1) {
+                                  updateQuantity(product.id, 1);
+                                } else if (val > product.stock_quantity) {
+                                  updateQuantity(product.id, product.stock_quantity);
+                                }
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-12 sm:w-14 text-center text-xs sm:text-sm font-bold font-mono tabular-nums bg-transparent text-zinc-900 dark:text-zinc-100 border-none focus:outline-none focus:ring-1 focus:ring-zinc-400 rounded py-1 px-0 appearance-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
                             <button
                               type="button"
                               disabled={isMaxInCart}
                               onClick={() => handleAddToCart(product)}
-                              className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg transition ${
+                              className={`flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg transition shrink-0 ${
                                 isMaxInCart
                                   ? 'bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600 cursor-not-allowed'
                                   : 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 shadow-xs'
@@ -499,9 +522,31 @@ export default function CatalogView({
                     >
                       <Minus className="h-3.5 w-3.5" />
                     </button>
-                    <span className="w-8 text-center text-sm font-semibold font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
-                      {detailQuantity}
-                    </span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={selectedDetailProduct.stock_quantity}
+                      value={detailQuantity}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (isNaN(val)) return;
+                        if (val <= 0) return;
+                        if (val > selectedDetailProduct.stock_quantity) {
+                          setDetailQuantity(selectedDetailProduct.stock_quantity);
+                        } else {
+                          setDetailQuantity(val);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        if (isNaN(val) || val < 1) {
+                          setDetailQuantity(1);
+                        } else if (val > selectedDetailProduct.stock_quantity) {
+                          setDetailQuantity(selectedDetailProduct.stock_quantity);
+                        }
+                      }}
+                      className="w-12 text-center text-sm font-semibold font-mono tabular-nums bg-transparent text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 rounded-lg py-1 px-1 focus:outline-none focus:ring-1 focus:ring-zinc-400 appearance-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
                     <button
                       type="button"
                       disabled={detailQuantity >= selectedDetailProduct.stock_quantity}

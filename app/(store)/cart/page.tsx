@@ -162,9 +162,31 @@ export default function CartPage() {
                           >
                             <Minus className="h-3 w-3" />
                           </button>
-                          <span className="w-8 text-center text-xs font-semibold font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
-                            {item.quantity}
-                          </span>
+                          <input
+                            type="number"
+                            min="1"
+                            max={item.stock_quantity}
+                            value={item.quantity}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (isNaN(val)) return;
+                              if (val <= 0) return;
+                              if (val > item.stock_quantity) {
+                                updateQuantity(item.id, item.stock_quantity);
+                              } else {
+                                updateQuantity(item.id, val);
+                              }
+                            }}
+                            onBlur={(e) => {
+                              const val = parseInt(e.target.value, 10);
+                              if (isNaN(val) || val < 1) {
+                                updateQuantity(item.id, 1);
+                              } else if (val > item.stock_quantity) {
+                                updateQuantity(item.id, item.stock_quantity);
+                              }
+                            }}
+                            className="w-10 text-center text-xs font-semibold font-mono tabular-nums bg-transparent text-zinc-900 dark:text-zinc-100 border-none focus:outline-none focus:ring-1 focus:ring-zinc-400 rounded py-0.5 appearance-none [-moz-appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
                           <button
                             type="button"
                             disabled={isMaxStock}
