@@ -109,16 +109,30 @@ function LoginContent() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
           {justRegistered && !errorMessage && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-emerald-50 p-3.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-              <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-emerald-600" />
-              <span>Pendaftaran akun berhasil! Silakan masuk dengan kata sandi Anda.</span>
+            <div className="mb-6 flex items-start gap-3.5 rounded-2xl border border-emerald-200/90 bg-emerald-50/70 p-4 text-xs font-semibold text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-xs animate-in fade-in">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/60 dark:text-emerald-400">
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+              <div className="flex-1 pt-0.5">
+                <span className="block font-bold">Pendaftaran Berhasil!</span>
+                <span className="mt-0.5 block font-normal leading-relaxed text-zinc-600 dark:text-zinc-300">
+                  Akun Anda telah aktif. Silakan masuk menggunakan kata sandi Anda.
+                </span>
+              </div>
             </div>
           )}
 
           {errorMessage && (
-            <div className="mb-5 flex items-start gap-2.5 rounded-xl bg-red-50 p-3.5 text-xs font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300">
-              <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
-              <span>{errorMessage}</span>
+            <div className="mb-6 flex items-start gap-3.5 rounded-2xl border border-rose-200/90 bg-rose-50/70 p-4 text-xs font-semibold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 shadow-xs animate-in fade-in">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-400">
+                <AlertCircle className="h-4 w-4" />
+              </div>
+              <div className="flex-1 pt-0.5">
+                <span className="block font-bold">Pemberitahuan</span>
+                <span className="mt-0.5 block font-normal leading-relaxed text-zinc-600 dark:text-zinc-300">
+                  {errorMessage}
+                </span>
+              </div>
             </div>
           )}
 

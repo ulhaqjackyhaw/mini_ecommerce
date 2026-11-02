@@ -101,6 +101,7 @@ import {
   Cell,
   Legend,
 } from 'recharts';
+import ToastCard, { type ToastAlert } from '@/components/ui/ToastCard';
 
 interface OrderWithItems extends Order {
   items?: OrderItem[];
@@ -129,17 +130,24 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
 
-  // New order banner toast notification
-  const [newOrderAlert, setNewOrderAlert] = useState<{
-    order_number: string;
-    customer_name: string;
-    total: number;
-  } | null>(null);
+  // Toast Alert Card Notification System
+  const [toastAlert, setToastAlert] = useState<ToastAlert | null>(null);
 
   // Modal detail pesanan
   const [activeModalOrder, setActiveModalOrder] = useState<OrderWithItems | null>(null);
   const [modalItemsLoading, setModalItemsLoading] = useState(false);
   const [statusUpdateNote, setStatusUpdateNote] = useState('');
+
+  // Close modal with ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveModalOrder(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // 1. Setup Supabase Realtime Listener untuk tabel orders
   useEffect(() => {
@@ -153,11 +161,14 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
         (payload) => {
           const newOrder = payload.new as OrderWithItems;
 
-          // Munculkan notifikasi banner pesanan baru
-          setNewOrderAlert({
-            order_number: newOrder.order_number,
-            customer_name: newOrder.customer_name,
-            total: newOrder.total,
+          // Munculkan notifikasi alert card pesanan baru yang seragam & cantik
+          setToastAlert({
+            type: 'order',
+            title: 'Pesanan Baru Masuk!',
+            message: `${newOrder.order_number} oleh ${newOrder.customer_name} (${formatCurrency(
+              newOrder.total
+            )})`,
+            duration: 7000,
           });
 
           // Masukkan ke state pesanan
@@ -395,7 +406,11 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
 
       const json = await res.json();
       if (!res.ok || !json.success) {
-        alert(json.message || 'Gagal mengubah status pesanan.');
+        setToastAlert({
+          type: 'error',
+          title: 'Gagal Mengubah Status',
+          message: json.message || 'Gagal mengubah status pesanan. Silakan coba lagi.',
+        });
         return;
       }
 
@@ -407,9 +422,19 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
       if (activeModalOrder && activeModalOrder.id === orderId) {
         setActiveModalOrder((prev) => (prev ? { ...prev, status: newStatus } : null));
       }
+
+      setToastAlert({
+        type: 'success',
+        title: 'Status Berhasil Diperbarui',
+        message: `Status pesanan berhasil diubah menjadi "${newStatus}".`,
+      });
     } catch (err) {
       console.error('Update status error:', err);
-      alert('Terjadi kesalahan saat memperbarui status.');
+      setToastAlert({
+        type: 'error',
+        title: 'Kesalahan Sistem',
+        message: 'Terjadi masalah koneksi saat memperbarui status pesanan.',
+      });
     } finally {
       setIsUpdatingStatus(null);
     }
@@ -443,28 +468,9 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
 
   return (
     <div className="space-y-8">
-      {/* Real-time Order Alert Banner */}
-      {newOrderAlert && (
-        <div className="flex items-center justify-between rounded-2xl bg-blue-600 p-4 text-white shadow-lg animate-pulse">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20">
-              <Bell className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold">Pesanan Baru Diterima!</h4>
-              <p className="text-xs text-blue-100">
-                {newOrderAlert.order_number} • {newOrderAlert.customer_name} ({formatCurrency(newOrderAlert.total)})
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setNewOrderAlert(null)}
-            className="rounded-lg p-1.5 hover:bg-white/20 transition"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+      {/* Alert Card Notification (Standar Desain Seragam) */}
+      {toastAlert && (
+        <ToastCard alert={toastAlert} onClose={() => setToastAlert(null)} />
       )}
 
       {/* Header */}
@@ -1020,15 +1026,21 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
 
       {/* 4. Modal Detail Pesanan */}
       {activeModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-            <div className="flex items-start justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setActiveModalOrder(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header (Sticky - Tidak ikut ter-scroll dan tombol X selalu terlihat) */}
+            <div className="flex items-center justify-between border-b border-zinc-100 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                   Detail Transaksi
                 </span>
-                <h3 className="text-lg font-mono font-extrabold text-blue-600 dark:text-blue-400">
+                <h3 className="text-lg font-mono font-black text-blue-600 dark:text-blue-400">
                   {activeModalOrder.order_number}
                 </h3>
                 <p className="text-xs text-zinc-500">
@@ -1038,132 +1050,151 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               <button
                 type="button"
                 onClick={() => setActiveModalOrder(null)}
-                className="rounded-lg p-1.5 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition"
+                aria-label="Tutup modal"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Customer Details Box */}
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl bg-zinc-50 p-4 text-xs dark:bg-zinc-800/50">
-              <div>
-                <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
-                  Pelanggan
-                </span>
-                <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">
-                  {activeModalOrder.customer_name}
-                </p>
-                <p className="text-zinc-500">{activeModalOrder.customer_phone}</p>
-              </div>
-              <div>
-                <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
-                  Alamat / Catatan
-                </span>
-                <p className="text-zinc-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">
-                  {activeModalOrder.customer_address || '-'}
-                </p>
-              </div>
-            </div>
-
-            {/* Items Table */}
-            <div className="mt-6">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
-                Daftar Produk yang Dipesan
-              </h4>
-
-              {modalItemsLoading ? (
-                <div className="flex items-center justify-center py-6">
-                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+            {/* Scrollable Body */}
+            <div className="overflow-y-auto p-6 space-y-6 flex-1">
+              {/* Customer Details Box */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-zinc-50 p-4 text-xs dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+                <div>
+                  <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
+                    Pelanggan
+                  </span>
+                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">
+                    {activeModalOrder.customer_name}
+                  </p>
+                  <p className="text-zinc-500">{activeModalOrder.customer_phone}</p>
                 </div>
-              ) : activeModalOrder.items && activeModalOrder.items.length > 0 ? (
-                <div className="divide-y divide-zinc-100 border rounded-xl overflow-hidden dark:divide-zinc-800 dark:border-zinc-800">
-                  {activeModalOrder.items.map((item, i) => (
-                    <div
-                      key={item.id || i}
-                      className="flex items-center justify-between p-3 text-xs"
-                    >
-                      <div>
-                        <p className="font-semibold text-zinc-900 dark:text-zinc-100">
-                          {item.product_name_snapshot}
-                        </p>
-                        <p className="text-zinc-400 text-[11px]">
-                          {item.quantity} x {formatCurrency(item.unit_price_snapshot)}
-                        </p>
-                      </div>
-                      <div className="font-bold text-zinc-900 dark:text-zinc-100">
-                        {formatCurrency(item.line_total)}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex justify-between p-3 bg-zinc-50 dark:bg-zinc-800/40 text-xs font-bold">
-                    <span>Total Pembayaran</span>
-                    <span className="text-sm text-blue-600 dark:text-blue-400">
-                      {formatCurrency(activeModalOrder.total)}
-                    </span>
+                <div>
+                  <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
+                    Alamat / Catatan
+                  </span>
+                  <p className="text-zinc-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">
+                    {activeModalOrder.customer_address || '-'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                  Daftar Produk yang Dipesan
+                </h4>
+
+                {modalItemsLoading ? (
+                  <div className="flex items-center justify-center py-6">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                   </div>
-                </div>
-              ) : (
-                <div className="text-xs text-zinc-400 py-4 text-center">
-                  Item tidak ditemukan.
-                </div>
-              )}
-            </div>
-
-            {/* Tombol Hubungi via WhatsApp (Tagihan & Verifikasi) */}
-            <div className="mt-5 rounded-2xl bg-emerald-50/70 p-4 border border-emerald-100 dark:border-emerald-950 dark:bg-emerald-950/20">
-              <a
-                href={`https://wa.me/${formatIndonesianPhoneNumber(
-                  activeModalOrder.customer_phone
-                )}?text=${generateWhatsAppBillingMessage(activeModalOrder)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-700 hover:scale-[1.01] active:scale-[0.99]"
-              >
-                <WhatsAppIcon className="h-5 w-5" />
-                <span>Hubungi via WhatsApp (Tagihan & Verifikasi)</span>
-              </a>
-              <p className="mt-2 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
-                Otomatis memformat nomor ke <strong>{formatIndonesianPhoneNumber(activeModalOrder.customer_phone)}</strong> dan menyusun template rincian pesanan, alamat, & instruksi transfer bank.
-              </p>
-            </div>
-
-            {/* Change Status Controls */}
-            <div className="mt-6 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
-                Ubah Status Pesanan
-              </h4>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {(['Pending', 'Processing', 'Completed', 'Cancelled'] as OrderStatus[]).map(
-                  (st) => {
-                    const isCurrent = activeModalOrder.status === st;
-
-                    return (
-                      <button
-                        key={st}
-                        type="button"
-                        disabled={isCurrent || isUpdatingStatus === activeModalOrder.id}
-                        onClick={() =>
-                          handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote)
-                        }
-                        className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
-                          isCurrent
-                            ? 'bg-zinc-200 text-zinc-500 cursor-default dark:bg-zinc-800 dark:text-zinc-500'
-                            : st === 'Processing'
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : st === 'Completed'
-                            ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                            : st === 'Cancelled'
-                            ? 'bg-red-600 text-white hover:bg-red-700'
-                            : 'bg-amber-600 text-white hover:bg-amber-700'
-                        }`}
+                ) : activeModalOrder.items && activeModalOrder.items.length > 0 ? (
+                  <div className="divide-y divide-zinc-100 border rounded-2xl overflow-hidden dark:divide-zinc-800 dark:border-zinc-800">
+                    {activeModalOrder.items.map((item, i) => (
+                      <div
+                        key={item.id || i}
+                        className="flex items-center justify-between p-3.5 text-xs"
                       >
-                        {isCurrent ? `Saat ini: ${st}` : `Ubah ke ${st}`}
-                      </button>
-                    );
-                  }
+                        <div>
+                          <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                            {item.product_name_snapshot}
+                          </p>
+                          <p className="text-zinc-400 text-[11px]">
+                            {item.quantity} x {formatCurrency(item.unit_price_snapshot)}
+                          </p>
+                        </div>
+                        <div className="font-bold text-zinc-900 dark:text-zinc-100">
+                          {formatCurrency(item.line_total)}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex justify-between p-3.5 bg-zinc-50 dark:bg-zinc-800/40 text-xs font-bold">
+                      <span>Total Pembayaran</span>
+                      <span className="text-base font-black text-blue-600 dark:text-blue-400">
+                        {formatCurrency(activeModalOrder.total)}
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs text-zinc-400 py-4 text-center">
+                    Item tidak ditemukan.
+                  </div>
                 )}
               </div>
+
+              {/* Tombol Hubungi via WhatsApp (Tagihan & Verifikasi) */}
+              <div className="rounded-2xl bg-emerald-50/70 p-4 border border-emerald-100 dark:border-emerald-950 dark:bg-emerald-950/20">
+                <a
+                  href={`https://wa.me/${formatIndonesianPhoneNumber(
+                    activeModalOrder.customer_phone
+                  )}?text=${generateWhatsAppBillingMessage(activeModalOrder)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-700 hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <WhatsAppIcon className="h-5 w-5" />
+                  <span>Hubungi via WhatsApp (Tagihan & Verifikasi)</span>
+                </a>
+                <p className="mt-2 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
+                  Otomatis memformat nomor ke <strong>{formatIndonesianPhoneNumber(activeModalOrder.customer_phone)}</strong> dan menyusun template rincian pesanan, alamat, & instruksi transfer bank.
+                </p>
+              </div>
+
+              {/* Change Status Controls */}
+              <div className="border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
+                  Ubah Status Pesanan
+                </h4>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  {(['Pending', 'Processing', 'Completed', 'Cancelled'] as OrderStatus[]).map(
+                    (st) => {
+                      const isCurrent = activeModalOrder.status === st;
+
+                      return (
+                        <button
+                          key={st}
+                          type="button"
+                          disabled={isCurrent || isUpdatingStatus === activeModalOrder.id}
+                          onClick={() =>
+                            handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote)
+                          }
+                          className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                            isCurrent
+                              ? 'bg-zinc-200 text-zinc-500 cursor-default dark:bg-zinc-800 dark:text-zinc-500'
+                              : st === 'Processing'
+                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              : st === 'Completed'
+                              ? 'bg-emerald-600 text-white hover:bg-emerald-700'
+                              : st === 'Cancelled'
+                              ? 'bg-red-600 text-white hover:bg-red-700'
+                              : 'bg-amber-600 text-white hover:bg-amber-700'
+                          }`}
+                        >
+                          {isCurrent ? `Saat ini: ${st}` : `Ubah ke ${st}`}
+                        </button>
+                      );
+                    }
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer (Sticky - Selalu terlihat di bawah) */}
+            <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/90 px-6 py-3.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/90 shrink-0">
+              <span className="text-[11px] text-zinc-400">
+                Klik area blur luar untuk keluar
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveModalOrder(null)}
+                className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-2 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition"
+              >
+                <X className="h-4 w-4" />
+                <span>Tutup</span>
+              </button>
             </div>
           </div>
         </div>

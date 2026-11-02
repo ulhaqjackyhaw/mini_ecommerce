@@ -18,6 +18,7 @@ import {
   RefreshCw,
   ShoppingBag,
 } from 'lucide-react';
+import ToastCard, { type ToastAlert } from '@/components/ui/ToastCard';
 
 interface ProductManagementViewProps {
   initialProducts: Product[];
@@ -32,12 +33,23 @@ export default function ProductManagementView({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastAlert, setToastAlert] = useState<ToastAlert | null>(null);
 
   // Modal State (Create or Edit)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Close modal on Escape key
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Form Fields
   const [formName, setFormName] = useState('');
@@ -54,8 +66,11 @@ export default function ProductManagementView({
   const [inlineStockValue, setInlineStockValue] = useState<number>(0);
 
   const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setToastAlert({
+      type: 'success',
+      title: 'Pemberitahuan',
+      message: msg,
+    });
   };
 
   const handleOpenCreateModal = () => {
@@ -108,7 +123,11 @@ export default function ProductManagementView({
         });
         const json = await res.json();
         if (!res.ok || !json.success) {
-          alert(json.message || 'Gagal menyimpan perubahan produk.');
+          setToastAlert({
+            type: 'error',
+            title: 'Gagal Menyimpan',
+            message: json.message || 'Gagal menyimpan perubahan produk.',
+          });
           setIsSaving(false);
           return;
         }
@@ -116,7 +135,11 @@ export default function ProductManagementView({
         setProducts((prev) =>
           prev.map((p) => (p.id === editingProduct.id ? json.data : p))
         );
-        showToast('Produk berhasil diperbarui.');
+        setToastAlert({
+          type: 'success',
+          title: 'Produk Diperbarui',
+          message: `Produk "${formName}" berhasil diperbarui.`,
+        });
       } else {
         // Create new
         const res = await fetch('/api/admin/products', {
@@ -135,19 +158,31 @@ export default function ProductManagementView({
         });
         const json = await res.json();
         if (!res.ok || !json.success) {
-          alert(json.message || 'Gagal menambahkan produk.');
+          setToastAlert({
+            type: 'error',
+            title: 'Gagal Menambah Produk',
+            message: json.message || 'Gagal menambahkan produk.',
+          });
           setIsSaving(false);
           return;
         }
 
         setProducts((prev) => [json.data, ...prev]);
-        showToast('Produk baru berhasil ditambahkan.');
+        setToastAlert({
+          type: 'success',
+          title: 'Produk Ditambahkan',
+          message: `Produk baru "${formName}" berhasil ditambahkan ke katalog.`,
+        });
       }
 
       setIsModalOpen(false);
     } catch (err) {
       console.error('Save product error:', err);
-      alert('Terjadi kesalahan saat menyimpan produk.');
+      setToastAlert({
+        type: 'error',
+        title: 'Kesalahan Sistem',
+        message: 'Terjadi kesalahan saat menyimpan produk.',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -167,9 +202,19 @@ export default function ProductManagementView({
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        alert(json.message || 'Gagal mengubah status aktif produk.');
+        setToastAlert({
+          type: 'error',
+          title: 'Gagal Mengubah Status',
+          message: json.message || 'Gagal mengubah status aktif produk.',
+        });
         return;
       }
+
+      setToastAlert({
+        type: 'info',
+        title: 'Status Diperbarui',
+        message: `Produk "${product.name}" kini ${updatedStatus ? 'Aktif' : 'Nonaktif'}.`,
+      });
 
       setProducts((prev) =>
         prev.map((p) => (p.id === product.id ? { ...p, is_active: updatedStatus } : p))
@@ -229,12 +274,9 @@ export default function ProductManagementView({
 
   return (
     <div className="space-y-6">
-      {/* Toast Alert */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-semibold text-white shadow-xl animate-fade-in">
-          <Check className="h-4 w-4" />
-          <span>{toastMessage}</span>
-        </div>
+      {/* Toast Alert Card Notification (Desain Seragam) */}
+      {toastAlert && (
+        <ToastCard alert={toastAlert} onClose={() => setToastAlert(null)} />
       )}
 
       {/* Header */}
@@ -532,22 +574,31 @@ export default function ProductManagementView({
 
       {/* Modal Add / Edit Product */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-zinc-200 pb-4 dark:border-zinc-800">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header (Sticky) */}
+            <div className="flex items-center justify-between border-b border-zinc-100 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
               <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
                 {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition"
+                aria-label="Tutup modal"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="mt-4 space-y-4 text-xs">
+            {/* Scrollable Form Body */}
+            <form id="productForm" onSubmit={handleSaveProduct} className="overflow-y-auto p-6 space-y-4 text-xs flex-1">
               {/* Product Name */}
               <div>
                 <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
@@ -673,26 +724,27 @@ export default function ProductManagementView({
                   Produk Aktif (Tampil di Katalog Toko)
                 </label>
               </div>
-
-              {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-2 border-t border-zinc-200 pt-4 dark:border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl border border-zinc-300 px-4 py-2 text-xs font-semibold text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="flex items-center gap-1.5 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400"
-                >
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                  <span>{editingProduct ? 'Simpan Perubahan' : 'Tambahkan Produk'}</span>
-                </button>
-              </div>
             </form>
+
+            {/* Modal Footer (Sticky) */}
+            <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/80 px-6 py-3.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-xl border border-zinc-300 bg-white px-5 py-2.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                form="productForm"
+                disabled={isSaving}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 disabled:bg-blue-400 transition"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                <span>{editingProduct ? 'Simpan Perubahan' : 'Tambahkan Produk'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

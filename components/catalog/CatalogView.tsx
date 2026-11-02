@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/components/cart/CartProvider';
 import { formatCurrency } from '@/lib/utils';
@@ -20,6 +20,7 @@ import {
   Package,
 } from 'lucide-react';
 import PageTransition from '@/components/animations/PageTransition';
+import ToastCard, { type ToastAlert } from '@/components/ui/ToastCard';
 
 interface CatalogViewProps {
   initialProducts: Product[];
@@ -36,11 +37,22 @@ export default function CatalogView({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [addedProductId, setAddedProductId] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastAlert, setToastAlert] = useState<ToastAlert | null>(null);
 
   // Modal Detail Produk State
   const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
   const [detailQuantity, setDetailQuantity] = useState<number>(1);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedDetailProduct(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Filter products by category and search keyword
   const filteredProducts = useMemo(() => {
@@ -74,10 +86,11 @@ export default function CatalogView({
         setAddedProductId(null);
       }, 1000);
     } else if (res.message) {
-      setToastMessage(res.message);
-      setTimeout(() => {
-        setToastMessage(null);
-      }, 2500);
+      setToastAlert({
+        type: 'warning',
+        title: 'Batas Stok Tercapai',
+        message: res.message,
+      });
     }
   };
 
@@ -94,28 +107,29 @@ export default function CatalogView({
     const res = addItem(product, detailQuantity);
     if (res.success) {
       setAddedProductId(product.id);
-      setToastMessage(`Berhasil menambahkan ${detailQuantity}x ${product.name} ke keranjang!`);
+      setToastAlert({
+        type: 'success',
+        title: 'Berhasil Masuk Keranjang',
+        message: `${detailQuantity}x ${product.name} berhasil ditambahkan ke keranjang belanja Anda.`,
+      });
       setTimeout(() => {
         setAddedProductId(null);
-        setToastMessage(null);
-      }, 2000);
+      }, 1500);
       setSelectedDetailProduct(null);
     } else if (res.message) {
-      setToastMessage(res.message);
-      setTimeout(() => {
-        setToastMessage(null);
-      }, 2500);
+      setToastAlert({
+        type: 'warning',
+        title: 'Batas Stok Tercapai',
+        message: res.message,
+      });
     }
   };
 
   return (
     <PageTransition className="w-full">
-      {/* Toast Alert Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-20 md:bottom-8 right-4 sm:right-8 z-50 flex items-center gap-2.5 rounded-2xl bg-rose-600 px-4 py-3 text-xs font-semibold text-white shadow-2xl animate-bounce">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
+      {/* Toast Alert Card Notification (Desain Seragam & Menawan) */}
+      {toastAlert && (
+        <ToastCard alert={toastAlert} onClose={() => setToastAlert(null)} />
       )}
 
       {/* Hero Header Section */}
@@ -392,10 +406,16 @@ export default function CatalogView({
 
       {/* Modal Detail Produk Interaktif & Responsif */}
       {selectedDetailProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[92vh] flex flex-col">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-zinc-100 px-6 py-4 dark:border-zinc-800">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setSelectedDetailProduct(null)}
+        >
+          <div
+            className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[92vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header (Sticky) */}
+            <div className="flex items-center justify-between border-b border-zinc-100 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
               <div className="flex items-center gap-2">
                 {selectedDetailProduct.category?.name && (
                   <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
@@ -407,7 +427,7 @@ export default function CatalogView({
               <button
                 type="button"
                 onClick={() => setSelectedDetailProduct(null)}
-                className="rounded-xl p-2 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition"
                 aria-label="Tutup detail"
               >
                 <X className="h-5 w-5" />
@@ -526,12 +546,20 @@ export default function CatalogView({
             </div>
 
             {/* Modal Footer / Direct Add Button */}
-            <div className="border-t border-zinc-100 p-4 sm:p-6 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-950/60">
+            <div className="flex items-center gap-3 border-t border-zinc-100 p-4 sm:p-5 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-950/80 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedDetailProduct(null)}
+                className="rounded-2xl border border-zinc-300 bg-white px-5 py-3.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition"
+              >
+                Tutup
+              </button>
+
               {selectedDetailProduct.stock_quantity <= 0 ? (
                 <button
                   type="button"
                   disabled
-                  className="w-full rounded-2xl bg-zinc-200 py-3.5 text-center text-sm font-bold text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
+                  className="flex-1 rounded-2xl bg-zinc-200 py-3.5 text-center text-xs font-bold text-zinc-400 cursor-not-allowed dark:bg-zinc-800 dark:text-zinc-600"
                 >
                   Stok Habis
                 </button>
@@ -539,13 +567,13 @@ export default function CatalogView({
                 <button
                   type="button"
                   onClick={() => handleAddDetailToCart(selectedDetailProduct)}
-                  className="flex w-full items-center justify-between rounded-2xl bg-blue-600 px-6 py-4 text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700 active:scale-[0.99]"
+                  className="flex flex-1 items-center justify-between rounded-2xl bg-blue-600 px-5 py-3.5 text-xs sm:text-sm font-black text-white shadow-lg shadow-blue-500/25 transition hover:bg-blue-700 active:scale-[0.99]"
                 >
                   <span className="flex items-center gap-2">
-                    <ShoppingBag className="h-5 w-5" />
+                    <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span>Tambah ke Keranjang ({detailQuantity} pcs)</span>
                   </span>
-                  <span className="text-base font-black">
+                  <span className="text-sm sm:text-base font-black">
                     {formatCurrency(selectedDetailProduct.price * detailQuantity)}
                   </span>
                 </button>
