@@ -14,21 +14,21 @@ export function Logo({
   showText = true,
 }: LogoProps) {
   const sizeClasses = {
-    sm: 'h-6 w-6 rounded-md text-xs',
-    md: 'h-8 w-8 rounded-lg text-sm',
-    lg: 'h-10 w-10 rounded-xl text-base',
-  };
-
-  const textSizes = {
-    sm: 'text-sm',
-    md: 'text-base',
-    lg: 'text-lg',
+    sm: 'h-7 w-7 rounded-lg text-xs',
+    md: 'h-9 w-9 sm:h-10 sm:w-10 rounded-xl text-sm',
+    lg: 'h-11 w-11 sm:h-12 sm:w-12 rounded-xl text-base',
   };
 
   const iconSvgSizes = {
     sm: 'h-3.5 w-3.5',
-    md: 'h-4 w-4',
-    lg: 'h-5 w-5',
+    md: 'h-4.5 w-4.5 sm:h-5 sm:w-5',
+    lg: 'h-5.5 w-5.5 sm:h-6 sm:w-6',
+  };
+
+  const textSizes = {
+    sm: 'text-sm font-bold',
+    md: 'text-base sm:text-lg font-extrabold',
+    lg: 'text-lg sm:text-2xl font-black',
   };
 
   return (

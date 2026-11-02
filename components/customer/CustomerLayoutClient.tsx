@@ -43,7 +43,7 @@ export default function CustomerLayoutClient({
 
   return (
     <div className="w-full min-h-[calc(100vh-5rem)] bg-slate-50/60 dark:bg-zinc-950/60">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="mx-auto max-w-[1440px] px-4 py-8 sm:px-8 sm:py-12 lg:px-12">
         {/* Header bar desktop & mobile */}
         <div className="mb-8 flex flex-col gap-5 border-b border-zinc-200/90 pb-6 sm:flex-row sm:items-center sm:justify-between dark:border-zinc-800">
           <div>

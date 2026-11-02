@@ -61,8 +61,8 @@ export default function CartPage() {
   }
 
   return (
-    <PageTransition className="w-full min-h-[calc(100vh-5rem)] bg-zinc-50/50 dark:bg-zinc-950/40 py-8">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <PageTransition className="w-full min-h-[calc(100vh-5rem)] bg-zinc-50/50 dark:bg-zinc-950/40 py-8 sm:py-12">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-8 lg:px-12">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
