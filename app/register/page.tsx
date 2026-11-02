@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Logo } from '@/components/ui/Logo';
 import { createClient } from '@/lib/supabase/client';
 import {
   User,
@@ -86,11 +87,11 @@ export default function RegisterPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link
           href="/"
-          className="inline-block text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="inline-flex items-center justify-center focus:outline-none"
         >
-          QUICKORDER.
+          <Logo iconSize="lg" />
         </Link>
-        <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+        <h2 className="mt-4 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           Daftar Akun Customer
         </h2>
         <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">

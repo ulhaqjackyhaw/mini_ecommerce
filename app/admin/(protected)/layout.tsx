@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import AdminLayoutClient from '@/components/admin/AdminLayoutClient';
 
 export const metadata = {
-  title: 'Admin Dashboard | QuickOrder',
+  title: 'Admin Dashboard | AmaraStore',
   description: 'Real-time order management, revenue analytics, and inventory control.',
 };
 

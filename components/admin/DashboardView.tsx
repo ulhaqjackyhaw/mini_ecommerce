@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { createClient } from '@/lib/supabase/client';
 import { useAdminRealtime } from '@/components/admin/AdminLayoutClient';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -63,7 +64,7 @@ function generateWhatsAppBillingMessage(order: OrderWithItems): string {
       ? order.customer_address.trim()
       : 'Ambil di Tempat / Tanpa Alamat Khusus';
 
-  const message = `Halo Kak *${order.customer_name}*, terima kasih telah memesan di *QuickOrder Store*! 🙏✨
+  const message = `Halo Kak *${order.customer_name}*, terima kasih telah memesan di *AmaraStore*! 🙏✨
 
 Kami ingin melakukan konfirmasi & verifikasi pesanan Anda:
 📋 *No. Pesanan:* ${order.order_number}
@@ -80,8 +81,8 @@ _(Mohon verifikasi apakah alamat pengiriman di atas sudah benar)_
 
 💳 *Instruksi Pembayaran Transfer Bank:*
 Silakan melakukan transfer sesuai total di atas ke rekening resmi kami:
-🏦 *Bank BCA:* 123-456-7890 (a.n. QuickOrder Store)
-🏦 *Bank Mandiri:* 987-654-3210 (a.n. QuickOrder Store)
+🏦 *Bank BCA:* 123-456-7890 (a.n. AmaraStore)
+🏦 *Bank Mandiri:* 987-654-3210 (a.n. AmaraStore)
 
 Setelah melakukan pembayaran, mohon kirimkan foto/screenshot *Bukti Transfer* ke WhatsApp ini agar pesanan Anda dapat segera kami proses & kirimkan. 
 
@@ -137,17 +138,31 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
   const [activeModalOrder, setActiveModalOrder] = useState<OrderWithItems | null>(null);
   const [modalItemsLoading, setModalItemsLoading] = useState(false);
   const [statusUpdateNote, setStatusUpdateNote] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Close modal with ESC key
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Lock body scroll and close modal with ESC key
+  useEffect(() => {
+    if (activeModalOrder) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setActiveModalOrder(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeModalOrder]);
 
   // 1. Setup Supabase Realtime Listener untuk tabel orders
   useEffect(() => {
@@ -1025,13 +1040,15 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
       </div>
 
       {/* 4. Modal Detail Pesanan */}
-      {activeModalOrder && (
+      {isMounted && activeModalOrder && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
           onClick={() => setActiveModalOrder(null)}
+          role="dialog"
+          aria-modal="true"
         >
           <div
-            className="relative w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl border border-zinc-200/80 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[88dvh] sm:max-h-[85vh] flex flex-col overflow-hidden"
+            className="relative w-full sm:max-w-2xl rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[88dvh] sm:max-h-[85vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -1196,7 +1213,8 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

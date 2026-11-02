@@ -4,6 +4,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { Logo } from '@/components/ui/Logo';
 import {
   LayoutDashboard,
   Boxes,
@@ -80,12 +81,10 @@ export default function AdminLayoutClient({
       <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
         {/* Desktop Sidebar */}
         <aside className="hidden lg:flex w-64 flex-col border-r border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          {/* Brand Wordmark (No Generic AI Icon) */}
+          {/* Brand Wordmark & Logo */}
           <div className="flex h-16 items-center justify-between border-b border-zinc-200/80 px-6 dark:border-zinc-800">
             <div className="flex items-center gap-2">
-              <span className="font-semibold tracking-tight text-zinc-900 text-base dark:text-zinc-50">
-                QUICKORDER.
-              </span>
+              <Logo iconSize="sm" />
               <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                 Admin
               </span>
@@ -181,9 +180,7 @@ export default function AdminLayoutClient({
         <div className="flex flex-1 flex-col min-w-0">
           <header className="flex h-15 items-center justify-between border-b border-zinc-200/80 bg-white px-4 lg:hidden dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex items-center gap-2">
-              <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-                QUICKORDER.
-              </span>
+              <Logo iconSize="sm" />
               <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
                 Admin
               </span>

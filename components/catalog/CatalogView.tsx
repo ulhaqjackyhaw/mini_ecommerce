@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useCart } from '@/components/cart/CartProvider';
 import { formatCurrency } from '@/lib/utils';
@@ -37,17 +38,31 @@ export default function CatalogView({
   // Modal Detail Produk State
   const [selectedDetailProduct, setSelectedDetailProduct] = useState<Product | null>(null);
   const [detailQuantity, setDetailQuantity] = useState<number>(1);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Close modal on Escape key
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Lock body scroll and listen to Escape key when modal is open
+  useEffect(() => {
+    if (selectedDetailProduct) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedDetailProduct(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedDetailProduct]);
 
   // Filter products by category and search keyword
   const filteredProducts = useMemo(() => {
@@ -371,14 +386,16 @@ export default function CatalogView({
         )}
       </div>
 
-      {/* Modal Detail Produk: Bottom-sheet on mobile, centered modal on desktop */}
-      {selectedDetailProduct && (
+      {/* Modal Detail Produk: Mounted to document.body via Portal to prevent any parent transforms or clipping */}
+      {isMounted && selectedDetailProduct && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in"
           onClick={() => setSelectedDetailProduct(null)}
+          role="dialog"
+          aria-modal="true"
         >
           <div
-            className="relative w-full sm:max-w-xl max-h-[88dvh] sm:max-h-[85vh] rounded-t-2xl sm:rounded-2xl border border-zinc-200/80 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 duration-200"
+            className="relative w-full max-w-lg max-h-[85vh] rounded-2xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -537,7 +554,8 @@ export default function CatalogView({
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </PageTransition>
   );

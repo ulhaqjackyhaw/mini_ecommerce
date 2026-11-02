@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import CustomerLayoutClient from '@/components/customer/CustomerLayoutClient';
 
 export const metadata = {
-  title: 'Akun Customer | QuickOrder',
+  title: 'Akun Customer | AmaraStore',
   description: 'Kelola riwayat pesanan dan profil pengiriman customer.',
 };
 

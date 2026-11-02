@@ -58,6 +58,11 @@ export default function BottomNav() {
     }
   }, [pathname]);
 
+  // SEMBUNYIKAN BOTTOM NAV SAAT DI HALAMAN ADMIN AGAR TIDAK DOUBLE NAVBAR
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   return (
     <nav
       aria-label="Navigasi bawah mobile"

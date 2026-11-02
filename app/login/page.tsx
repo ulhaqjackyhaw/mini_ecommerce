@@ -4,6 +4,7 @@ import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Logo from '@/components/ui/Logo';
 import {
   Lock,
   Mail,
@@ -91,9 +92,9 @@ function LoginContent() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link
           href="/"
-          className="inline-block text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="inline-block transition-opacity hover:opacity-85"
         >
-          QUICKORDER.
+          <Logo iconSize="lg" />
         </Link>
         <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           Masuk ke Akun Anda

@@ -3,6 +3,7 @@
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { Logo } from '@/components/ui/Logo';
 import { createClient } from '@/lib/supabase/client';
 import {
   ShieldCheck,
@@ -116,13 +117,13 @@ function LoginForm() {
         </Link>
 
         <div className="text-center">
-          <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            QUICKORDER.
-          </span>
-          <span className="ml-2 rounded-md bg-zinc-100 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-            Admin
-          </span>
-          <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <div className="inline-flex items-center justify-center gap-2">
+            <Logo iconSize="md" />
+            <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+              Admin
+            </span>
+          </div>
+          <h2 className="mt-4 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             Login Admin Panel
           </h2>
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">

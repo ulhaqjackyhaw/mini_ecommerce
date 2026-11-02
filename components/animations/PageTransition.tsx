@@ -17,8 +17,8 @@ export default function PageTransition({
 
   return (
     <div
-      className={`flex-1 flex flex-col transition-all duration-300 ease-out ${
-        mounted ? 'opacity-100 translate-y-0' : 'opacity-100 translate-y-0'
+      className={`flex-1 flex flex-col transition-opacity duration-200 ease-out ${
+        mounted ? 'opacity-100' : 'opacity-100'
       } ${className}`}
     >
       {children}

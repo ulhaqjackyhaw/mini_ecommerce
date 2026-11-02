@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { Logo } from '@/components/ui/Logo';
 import type { OrderWithDetails, OrderStatus } from '@/types/database';
 import {
   Printer,
@@ -97,10 +98,8 @@ export default function InvoiceView({ order }: InvoiceViewProps) {
           <div className="border-b border-zinc-200/80 bg-zinc-50/50 p-6 sm:p-8 dark:border-zinc-800 dark:bg-zinc-950/30">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <span className="font-semibold tracking-tight text-zinc-900 text-lg dark:text-zinc-50">
-                  QUICKORDER.
-                </span>
-                <span className="block text-[11px] font-mono uppercase tracking-widest text-zinc-400 mt-0.5">
+                <Logo iconSize="md" />
+                <span className="block text-[11px] font-mono uppercase tracking-widest text-zinc-400 mt-1">
                   Digital Invoice
                 </span>
                 <p className="mt-2 text-xs text-zinc-500 max-w-sm dark:text-zinc-400">
@@ -226,7 +225,7 @@ export default function InvoiceView({ order }: InvoiceViewProps) {
           {/* Footer Note */}
           <div className="border-t border-zinc-200/80 bg-zinc-50/50 p-4 sm:p-6 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-950/30 dark:text-zinc-400">
             <p className="font-medium text-zinc-700 dark:text-zinc-300">
-              Terima kasih telah berbelanja di QuickOrder.
+              Terima kasih telah berbelanja di AmaraStore.
             </p>
             <p className="mt-0.5 text-[11px] text-zinc-400">
               Simpan nomor pesanan Anda untuk pengecekan status secara berkala.

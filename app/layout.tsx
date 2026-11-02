@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QuickOrder — Mini E-Commerce",
-  description: "Pesan produk cepat tanpa login, invoice instan, dan pelacakan pesanan.",
+  title: "AmaraStore — Belanja Cepat & Mudah",
+  description: "Pesan produk langsung tanpa wajib login, invoice digital instan, dan pelacakan pesanan real-time.",
 };
 
 export default function RootLayout({
