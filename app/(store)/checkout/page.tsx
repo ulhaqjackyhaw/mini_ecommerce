@@ -16,6 +16,8 @@ import {
   User,
   Phone,
   MapPin,
+  Lock,
+  Sparkles,
 } from 'lucide-react';
 
 export default function CheckoutPage() {
@@ -49,27 +51,29 @@ export default function CheckoutPage() {
 
   if (!isInitialized) {
     return (
-      <div className="flex flex-1 items-center justify-center py-20">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="flex flex-1 items-center justify-center py-24">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-4 py-20 text-center">
-        <ShoppingBag className="h-12 w-12 text-zinc-400" />
-        <h2 className="mt-4 text-xl font-bold text-zinc-900 dark:text-zinc-100">
-          Keranjang Anda Kosong
+      <div className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
+        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50 text-blue-600 dark:bg-zinc-800 dark:text-blue-400">
+          <ShoppingBag className="h-10 w-10" />
+        </div>
+        <h2 className="mt-6 text-2xl font-black text-zinc-900 dark:text-zinc-100">
+          Keranjang Belanja Masih Kosong
         </h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          Tambahkan setidaknya satu produk untuk melakukan pemesanan.
+        <p className="mt-2 text-sm text-zinc-500 max-w-sm">
+          Pilih produk favorit Anda di katalog terlebih dahulu untuk melanjutkan pemesanan.
         </p>
         <Link
           href="/"
-          className="mt-6 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+          className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-7 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition hover:bg-blue-700 hover:scale-[1.02]"
         >
-          Kembali ke Katalog
+          <span>Kembali ke Katalog</span>
         </Link>
       </div>
     );
@@ -130,7 +134,7 @@ export default function CheckoutPage() {
 
       const orderData = json.data;
 
-      // Simpan tracking token di localStorage untuk akses tracking otomatis
+      // Simpan tracking token di localStorage untuk kemudahan akses
       try {
         const storedTokens = JSON.parse(
           localStorage.getItem('mini_ecommerce_tracking_tokens') || '{}'
@@ -141,218 +145,243 @@ export default function CheckoutPage() {
           JSON.stringify(storedTokens)
         );
       } catch {
-        // Abaikan jika localStorage tidak tersedia
+        // Abaikan
       }
 
       // Kosongkan keranjang setelah berhasil checkout
       clearCart();
 
-      // Redirect ke halaman invoice digital
+      // Redirect otomatis langsung ke halaman Digital Invoice
       router.push(`/invoice/${orderData.order_number}`);
     } catch (err: unknown) {
       console.error('Checkout error:', err);
-      setErrorMessage('Terjadi masalah jaringan atau koneksi server. Coba lagi beberapa saat.');
+      setErrorMessage('Terjadi masalah koneksi jaringan server. Silakan coba lagi.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Back button */}
-      <div className="mb-6">
-        <Link
-          href="/cart"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Kembali ke Keranjang</span>
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Checkout Form */}
-        <div className="lg:col-span-7">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
-            <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
-              <div>
-                <h1 className="text-xl font-bold text-zinc-900 sm:text-2xl dark:text-zinc-50">
-                  {loggedInUserId ? 'Customer Checkout' : 'Guest Checkout'}
-                </h1>
-                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                  {loggedInUserId
-                    ? `Data otomatis terisi dari akun Anda (${loggedInUserEmail}).`
-                    : 'Pemesanan cepat tanpa harus login atau registrasi akun.'}
-                </p>
-              </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-zinc-800 dark:text-blue-400">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-            </div>
-
-            {loggedInUserId && (
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-blue-50/70 p-3 text-xs text-blue-900 dark:bg-blue-950/30 dark:text-blue-300">
-                <span className="flex items-center gap-1.5 font-medium">
-                  <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  <span>Akun Customer Terhubung: Pesanan ini akan tercatat di histori akun Anda.</span>
-                </span>
-              </div>
-            )}
-
-            {errorMessage && (
-              <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-red-50 p-4 text-xs font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300">
-                <AlertCircle className="h-4 w-4 flex-shrink-0 text-red-600" />
-                <span>{errorMessage}</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-              {/* Customer Name */}
-              <div>
-                <label
-                  htmlFor="customer_name"
-                  className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
-                >
-                  Nama Lengkap <span className="text-red-500">*</span>
-                </label>
-                <div className="relative mt-1.5">
-                  <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    id="customer_name"
-                    type="text"
-                    required
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    placeholder="Contoh: Budi Santoso"
-                    disabled={isSubmitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                  />
-                </div>
-              </div>
-
-              {/* Customer Phone / WhatsApp */}
-              <div>
-                <label
-                  htmlFor="customer_phone"
-                  className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
-                >
-                  No. Telepon / WhatsApp <span className="text-red-500">*</span>
-                </label>
-                <div className="relative mt-1.5">
-                  <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
-                  <input
-                    id="customer_phone"
-                    type="tel"
-                    required
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    placeholder="Contoh: 081234567890"
-                    disabled={isSubmitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                  />
-                </div>
-                <p className="mt-1 text-[11px] text-zinc-400">
-                  Digunakan untuk konfirmasi dan update status pesanan.
-                </p>
-              </div>
-
-              {/* Customer Address / Notes */}
-              <div>
-                <label
-                  htmlFor="customer_address"
-                  className="block text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
-                >
-                  Alamat Pengiriman / Catatan Pesanan{' '}
-                  <span className="text-zinc-400 font-normal">(Opsional)</span>
-                </label>
-                <div className="relative mt-1.5">
-                  <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
-                  <textarea
-                    id="customer_address"
-                    rows={3}
-                    value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                    placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau catatan 'Jangan terlalu pedas'"
-                    disabled={isSubmitting}
-                    className="w-full rounded-xl border border-zinc-300 bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-                  />
-                </div>
-              </div>
-
-              {/* Submit button */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-98 disabled:cursor-not-allowed disabled:bg-blue-400"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Memproses Pesanan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Buat Pesanan & Dapatkan Invoice ({formatCurrency(total)})</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="w-full min-h-[calc(100vh-5rem)] bg-slate-50/60 dark:bg-zinc-950/60">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        {/* Tombol kembali */}
+        <div className="mb-6">
+          <Link
+            href="/cart"
+            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>← Kembali ke Keranjang</span>
+          </Link>
         </div>
 
-        {/* Order Items Preview Sidebar */}
-        <div className="lg:col-span-5">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
-              Rincian Item ({totalItems})
-            </h2>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
+          {/* Kolom Kiri: Formulir Checkout yang Luas & Besar (7 Cols) */}
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl border border-zinc-200/90 bg-white p-7 sm:p-10 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex items-start justify-between border-b border-zinc-100 pb-6 dark:border-zinc-800">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 mb-2">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    <span>Pemesanan Cepat & Instan</span>
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-50">
+                    {loggedInUserId ? 'Customer Checkout' : 'Guest Checkout'}
+                  </h1>
+                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                    {loggedInUserId
+                      ? `Data formulir otomatis terisi dari akun profil Anda (${loggedInUserEmail}).`
+                      : 'Pesan langsung tanpa perlu login atau registrasi akun.'}
+                  </p>
+                </div>
+                <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-zinc-800 dark:text-blue-400 shadow-xs">
+                  <ShieldCheck className="h-6 w-6" />
+                </div>
+              </div>
 
-            <div className="mt-4 divide-y divide-zinc-100 max-h-80 overflow-y-auto pr-1 dark:divide-zinc-800">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 py-3">
-                  <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
-                    {item.image_url ? (
-                      <Image
-                        src={item.image_url}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-zinc-400">
-                        <ShoppingBag className="h-4 w-4" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate text-xs font-semibold text-zinc-900 dark:text-zinc-100">
-                      {item.name}
-                    </p>
-                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
-                      {item.quantity} x {formatCurrency(item.price)}
-                    </p>
-                  </div>
-                  <div className="text-right text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                    {formatCurrency(item.price * item.quantity)}
+              {loggedInUserId && (
+                <div className="mt-5 flex items-center justify-between rounded-2xl bg-blue-50/80 p-4 text-xs sm:text-sm text-blue-900 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-100 dark:border-blue-900/60">
+                  <span className="flex items-center gap-2 font-semibold">
+                    <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                    <span>Akun Customer Terhubung: Riwayat pesanan otomatis tercatat di dashboard akun Anda.</span>
+                  </span>
+                </div>
+              )}
+
+              {errorMessage && (
+                <div className="mt-5 flex items-start gap-3 rounded-2xl bg-rose-50 p-4 text-sm font-semibold text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 border border-rose-200/80">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0 text-rose-600 mt-0.5" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                {/* Nama Lengkap */}
+                <div>
+                  <label
+                    htmlFor="customer_name"
+                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                  >
+                    Nama Lengkap <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative mt-2">
+                    <User className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+                    <input
+                      id="customer_name"
+                      type="text"
+                      required
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Contoh: Budi Santoso"
+                      disabled={isSubmitting}
+                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="mt-4 border-t border-zinc-200 pt-4 space-y-2 dark:border-zinc-800">
-              <div className="flex justify-between text-xs text-zinc-500 dark:text-zinc-400">
-                <span>Subtotal</span>
-                <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                  {formatCurrency(subtotal)}
-                </span>
+                {/* Nomor Telepon / WhatsApp */}
+                <div>
+                  <label
+                    htmlFor="customer_phone"
+                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                  >
+                    Nomor WhatsApp / Telepon <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative mt-2">
+                    <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+                    <input
+                      id="customer_phone"
+                      type="tel"
+                      required
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="Contoh: 081234567890"
+                      disabled={isSubmitting}
+                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-xs text-zinc-400">
+                    Digunakan untuk konfirmasi pesanan dan informasi pengiriman.
+                  </p>
+                </div>
+
+                {/* Alamat Pengiriman / Catatan */}
+                <div>
+                  <label
+                    htmlFor="customer_address"
+                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                  >
+                    Alamat Pengiriman / Catatan Pesanan{' '}
+                    <span className="text-zinc-400 font-normal lowercase">(opsional)</span>
+                  </label>
+                  <div className="relative mt-2">
+                    <MapPin className="pointer-events-none absolute left-4 top-4 h-5 w-5 text-zinc-400" />
+                    <textarea
+                      id="customer_address"
+                      rows={3}
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau catatan 'Es sedikit saja'"
+                      disabled={isSubmitting}
+                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                    />
+                  </div>
+                </div>
+
+                {/* Tombol Buat Pesanan yang Besar & Jelas */}
+                <div className="pt-3">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-600 py-4 px-6 text-sm sm:text-base font-black text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-blue-400"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        <span>Memproses Pesanan & Menerbitkan Invoice...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
+                        <span>Buat Pesanan & Dapatkan Invoice ({formatCurrency(total)})</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="mt-2 text-center text-xs text-zinc-400">
+                    Setelah tombol ditekan, Anda akan langsung diarahkan ke halaman Invoice Digital resmi.
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          {/* Kolom Kanan: Ringkasan Item Pesanan yang Lengkap (5 Cols) */}
+          <div className="lg:col-span-5 sticky top-24">
+            <div className="rounded-3xl border border-zinc-200/90 bg-white p-7 sm:p-8 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
+                <h2 className="text-lg font-black text-zinc-900 dark:text-zinc-100">
+                  Rincian Item ({totalItems})
+                </h2>
+                <Link
+                  href="/cart"
+                  className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  Ubah
+                </Link>
               </div>
-              <div className="flex justify-between text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                <span>Total Pembayaran</span>
-                <span className="text-base text-blue-600 dark:text-blue-400">
-                  {formatCurrency(total)}
-                </span>
+
+              {/* Scrollable Items List */}
+              <div className="mt-4 divide-y divide-zinc-100 max-h-96 overflow-y-auto pr-2 dark:divide-zinc-800">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4 py-3.5">
+                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800 shadow-xs">
+                      {item.image_url ? (
+                        <Image
+                          src={item.image_url}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-zinc-400">
+                          <ShoppingBag className="h-5 w-5" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                        {item.quantity} × {formatCurrency(item.price)}
+                      </p>
+                    </div>
+                    <div className="text-right text-sm font-black text-zinc-900 dark:text-zinc-100">
+                      {formatCurrency(item.price * item.quantity)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Kalkulasi Subtotal & Total */}
+              <div className="mt-5 border-t border-zinc-200 pt-5 space-y-3 dark:border-zinc-800">
+                <div className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400">
+                  <span>Subtotal Belanja</span>
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200">
+                    {formatCurrency(subtotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-zinc-400">
+                  <span>Biaya Pengiriman</span>
+                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                    Gratis (Promo Toko)
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-zinc-200/80 pt-3 text-base sm:text-lg font-black dark:border-zinc-800">
+                  <span className="text-zinc-900 dark:text-zinc-100">Total Pembayaran</span>
+                  <span className="text-xl sm:text-2xl text-blue-600 dark:text-blue-400">
+                    {formatCurrency(total)}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -361,4 +390,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-
