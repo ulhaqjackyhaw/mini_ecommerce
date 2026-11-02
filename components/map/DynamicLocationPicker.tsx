@@ -17,3 +17,4 @@ const DynamicLocationPicker = dynamic(() => import('@/components/map/LocationPic
 });
 
 export default DynamicLocationPicker;
+
