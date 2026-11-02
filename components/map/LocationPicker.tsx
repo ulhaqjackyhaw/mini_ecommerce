@@ -10,6 +10,7 @@ import {
   X,
   Check,
 } from 'lucide-react';
+import { useDialog } from '@/components/ui/DialogProvider';
 import 'leaflet/dist/leaflet.css';
 
 interface LocationPickerProps {
@@ -25,6 +26,7 @@ export default function LocationPicker({
   onLocationSelect,
   className = '',
 }: LocationPickerProps) {
+  const { alert: showAlertDialog } = useDialog();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
@@ -175,7 +177,11 @@ export default function LocationPicker({
   // GPS Current Location Handler
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Browser Anda tidak mendukung deteksi lokasi GPS.');
+      showAlertDialog({
+        title: 'GPS Tidak Didukung',
+        message: 'Browser Anda tidak mendukung deteksi lokasi otomatis.',
+        type: 'warning',
+      });
       return;
     }
 
@@ -193,9 +199,12 @@ export default function LocationPicker({
       },
       (err) => {
         console.warn('Geolocation error:', err);
-        alert(
-          'Tidak dapat mendeteksi lokasi GPS secara otomatis. Pastikan izin lokasi telah aktif atau ketik alamat pada kotak pencarian.'
-        );
+        showAlertDialog({
+          title: 'Izin Lokasi Dibutuhkan',
+          message:
+            'Tidak dapat mendeteksi lokasi GPS secara otomatis. Pastikan izin lokasi telah aktif pada browser Anda atau cari alamat secara manual pada kotak pencarian.',
+          type: 'warning',
+        });
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }

@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useAdminRealtime } from '@/components/admin/AdminLayoutClient';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Order, OrderItem, OrderStatus } from '@/types/database';
+import { useDialog } from '@/components/ui/DialogProvider';
 import {
   ShoppingBag,
   Clock,
@@ -134,6 +135,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 
 export default function DashboardView({ initialOrders }: DashboardViewProps) {
   const { setStatus } = useAdminRealtime();
+  const { confirm } = useDialog();
   const [orders, setOrders] = useState<OrderWithItems[]>(initialOrders);
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1235,9 +1237,19 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                           key={st}
                           type="button"
                           disabled={isCurrent || isThisUpdating}
-                          onClick={() =>
-                            handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote)
-                          }
+                          onClick={async () => {
+                            if (st === 'Cancelled') {
+                              const ok = await confirm({
+                                title: 'Batalkan Pesanan?',
+                                message: `Apakah Anda yakin ingin membatalkan pesanan ${activeModalOrder.order_number}? Tindakan ini akan mengembalikan stok produk ke sistem.`,
+                                confirmText: 'Ya, Batalkan',
+                                cancelText: 'Kembali',
+                                type: 'danger',
+                              });
+                              if (!ok) return;
+                            }
+                            handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote);
+                          }}
                           className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                             isCurrent
                               ? 'bg-zinc-200 text-zinc-500 cursor-default dark:bg-zinc-800 dark:text-zinc-500'

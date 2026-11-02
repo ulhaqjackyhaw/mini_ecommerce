@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/components/cart/CartProvider';
 import { createClient } from '@/lib/supabase/client';
 import Logo from '@/components/ui/Logo';
+import { useDialog } from '@/components/ui/DialogProvider';
 import {
   ShoppingBag,
   Package,
@@ -28,6 +29,7 @@ export default function Navbar() {
   const [userRole, setUserRole] = useState<'admin' | 'customer' | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { confirm } = useDialog();
 
   useEffect(() => {
     try {
@@ -71,6 +73,16 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
+
+    const ok = await confirm({
+      title: 'Keluar dari Akun?',
+      message: 'Apakah Anda yakin ingin keluar dari sesi login saat ini?',
+      confirmText: 'Keluar',
+      cancelText: 'Batal',
+      type: 'warning',
+    });
+    if (!ok) return;
+
     setIsLoggingOut(true);
     try {
       const supabase = createClient();

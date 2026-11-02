@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Logo } from '@/components/ui/Logo';
+import { useDialog } from '@/components/ui/DialogProvider';
 import {
   LayoutDashboard,
   Boxes,
@@ -42,6 +43,7 @@ export default function AdminLayoutClient({
     'CONNECTED' | 'CONNECTING' | 'DISCONNECTED'
   >('CONNECTED');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { confirm } = useDialog();
 
   useEffect(() => {
     const supabase = createClient();
@@ -54,6 +56,16 @@ export default function AdminLayoutClient({
 
   const handleLogout = async () => {
     if (isLoggingOut) return;
+
+    const ok = await confirm({
+      title: 'Keluar dari Panel Admin?',
+      message: 'Apakah Anda yakin ingin keluar dari sesi Dashboard Admin?',
+      confirmText: 'Keluar',
+      cancelText: 'Batal',
+      type: 'warning',
+    });
+    if (!ok) return;
+
     setIsLoggingOut(true);
     try {
       const supabase = createClient();

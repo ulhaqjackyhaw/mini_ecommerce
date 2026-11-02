@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/components/cart/CartProvider';
+import { useDialog } from '@/components/ui/DialogProvider';
 import { formatCurrency } from '@/lib/utils';
 import PageTransition from '@/components/animations/PageTransition';
 import {
@@ -28,6 +29,7 @@ export default function CartPage() {
     clearCart,
     isInitialized,
   } = useCart();
+  const { confirm } = useDialog();
 
   if (!isInitialized) {
     return (
@@ -80,8 +82,16 @@ export default function CartPage() {
 
           <button
             type="button"
-            onClick={() => {
-              if (confirm('Apakah Anda yakin ingin mengosongkan keranjang?')) {
+            onClick={async () => {
+              const confirmed = await confirm({
+                title: 'Kosongkan Keranjang?',
+                message:
+                  'Apakah Anda yakin ingin mengosongkan seluruh isi keranjang? Semua produk yang telah dipilih akan dihapus.',
+                confirmText: 'Kosongkan Keranjang',
+                cancelText: 'Batal',
+                type: 'danger',
+              });
+              if (confirmed) {
                 clearCart();
               }
             }}
@@ -180,7 +190,18 @@ export default function CartPage() {
                         {/* Remove button */}
                         <button
                           type="button"
-                          onClick={() => removeItem(item.id)}
+                          onClick={async () => {
+                            const confirmed = await confirm({
+                              title: 'Hapus dari Keranjang?',
+                              message: `Hapus "${item.name}" dari keranjang belanja Anda?`,
+                              confirmText: 'Hapus Item',
+                              cancelText: 'Batal',
+                              type: 'danger',
+                            });
+                            if (confirmed) {
+                              removeItem(item.id);
+                            }
+                          }}
                           className="rounded-lg p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 dark:hover:text-rose-400 transition"
                           title="Hapus"
                         >
