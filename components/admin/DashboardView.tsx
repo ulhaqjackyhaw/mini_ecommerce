@@ -513,9 +513,9 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               key={preset.id}
               type="button"
               onClick={() => setDatePreset(preset.id as any)}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition-all ${
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                 datePreset === preset.id
-                  ? 'bg-blue-600 text-white shadow-xs scale-[1.02]'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                   : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
@@ -533,7 +533,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="rounded-xl border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
+                className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
               />
             </div>
             <div className="flex items-center gap-1.5">
@@ -542,7 +542,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="rounded-xl border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
+                className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1 text-xs text-zinc-800 shadow-xs focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200"
               />
             </div>
             {(customStartDate || customEndDate) && (
@@ -552,7 +552,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                   setCustomStartDate('');
                   setCustomEndDate('');
                 }}
-                className="rounded-lg bg-zinc-100 px-2.5 py-1 text-[11px] font-semibold text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+                className="rounded-lg bg-zinc-100 px-2.5 py-1 text-[11px] font-medium text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
               >
                 Reset
               </button>
@@ -561,78 +561,78 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
         )}
       </div>
 
-      {/* 1. Summary Cards */}
+      {/* 1. Summary Cards (Clean Monochromatic Neutral) */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {/* Total Pesanan */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-4.5 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Pesanan</span>
-            <ShoppingBag className="h-5 w-5 text-zinc-600 dark:text-zinc-300" />
+            <span className="text-[11px] font-medium uppercase tracking-wider">Total Pesanan</span>
+            <ShoppingBag className="h-4 w-4 text-zinc-500" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold text-zinc-900 dark:text-zinc-50">
+          <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
             {summaryMetrics.totalOrders}
           </div>
           <span className="mt-1 block text-[11px] text-zinc-400">Seluruh riwayat pesanan</span>
         </div>
 
         {/* Pending */}
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
-          <div className="flex items-center justify-between text-amber-700 dark:text-amber-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Menunggu (Pending)</span>
-            <Clock className="h-5 w-5" />
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-4.5 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-[11px] font-medium uppercase tracking-wider">Menunggu</span>
+            <Clock className="h-4 w-4 text-amber-500" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold text-amber-800 dark:text-amber-300">
+          <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
             {summaryMetrics.pendingCount}
           </div>
-          <span className="mt-1 block text-[11px] text-amber-700/80 dark:text-amber-400/80">Perlu diproses segera</span>
+          <span className="mt-1 block text-[11px] text-amber-600 dark:text-amber-400">Perlu diproses segera</span>
         </div>
 
         {/* Processing */}
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5 shadow-sm dark:border-blue-900/40 dark:bg-blue-950/20">
-          <div className="flex items-center justify-between text-blue-700 dark:text-blue-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Diproses</span>
-            <Package className="h-5 w-5" />
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-4.5 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-[11px] font-medium uppercase tracking-wider">Diproses</span>
+            <Package className="h-4 w-4 text-zinc-500" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold text-blue-800 dark:text-blue-300">
+          <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
             {summaryMetrics.processingCount}
           </div>
-          <span className="mt-1 block text-[11px] text-blue-700/80 dark:text-blue-400/80">Sedang disiapkan</span>
+          <span className="mt-1 block text-[11px] text-zinc-400">Sedang disiapkan</span>
         </div>
 
         {/* Completed */}
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
-          <div className="flex items-center justify-between text-emerald-700 dark:text-emerald-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Selesai</span>
-            <CheckCircle2 className="h-5 w-5" />
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-4.5 dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="flex items-center justify-between text-zinc-400">
+            <span className="text-[11px] font-medium uppercase tracking-wider">Selesai</span>
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           </div>
-          <div className="mt-3 text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
+          <div className="mt-2 text-2xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
             {summaryMetrics.completedCount}
           </div>
-          <span className="mt-1 block text-[11px] text-emerald-700/80 dark:text-emerald-400/80">Transaksi sukses</span>
+          <span className="mt-1 block text-[11px] text-emerald-600 dark:text-emerald-400">Transaksi sukses</span>
         </div>
 
         {/* Total Omzet */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-4.5 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="flex items-center justify-between text-zinc-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Omzet</span>
-            <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <span className="text-[11px] font-medium uppercase tracking-wider">Total Omzet</span>
+            <TrendingUp className="h-4 w-4 text-zinc-500" />
           </div>
-          <div className="mt-3 text-xl font-extrabold text-blue-600 dark:text-blue-400 truncate" title={formatCurrency(summaryMetrics.totalRevenue)}>
+          <div className="mt-2 text-xl font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50 truncate" title={formatCurrency(summaryMetrics.totalRevenue)}>
             {formatCurrency(summaryMetrics.totalRevenue)}
           </div>
-          <span className="mt-1 block text-[11px] text-zinc-400">Dari pesanan berstatus Selesai</span>
+          <span className="mt-1 block text-[11px] text-zinc-400">Dari pesanan Selesai</span>
         </div>
       </div>
 
-      {/* 2. Visual Charts (Recharts) */}
+      {/* 2. Visual Charts (Clean Monochromatic) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Sales Trend Area Chart */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 lg:col-span-8">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:col-span-8">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+              <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                 Tren Omzet Penjualan{' '}
-                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                <span className="text-xs font-normal text-zinc-500">
                   (
                   {datePreset === 'today'
                     ? 'Hari Ini'
@@ -646,22 +646,22 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                   )
                 </span>
               </h3>
-              <p className="text-xs text-zinc-400">Grafik akumulasi transaksi harian</p>
+              <p className="text-xs text-zinc-400">Akumulasi pendapatan harian</p>
             </div>
           </div>
 
-          <div className="mt-6 h-64 w-full">
+          <div className="mt-5 h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={salesChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#18181b" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#18181b" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="label" stroke="#888888" fontSize={12} tickLine={false} />
+                <XAxis dataKey="label" stroke="#a1a1aa" fontSize={11} tickLine={false} />
                 <YAxis
-                  stroke="#888888"
+                  stroke="#a1a1aa"
                   fontSize={11}
                   tickLine={false}
                   tickFormatter={(val) => `Rp${val / 1000}k`}
@@ -670,7 +670,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                   formatter={(val: any) => [formatCurrency(Number(val) || 0), 'Omzet']}
                   contentStyle={{
                     backgroundColor: '#18181b',
-                    borderRadius: '12px',
+                    borderRadius: '8px',
                     border: 'none',
                     color: '#ffffff',
                     fontSize: '12px',
@@ -679,8 +679,8 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="#2563eb"
-                  strokeWidth={2.5}
+                  stroke="#18181b"
+                  strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#colorRevenue)"
                 />
@@ -690,9 +690,9 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
         </div>
 
         {/* Status Distribution Pie Chart */}
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 lg:col-span-4 flex flex-col justify-between">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 lg:col-span-4 flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
               Distribusi Status Pesanan
             </h3>
             <p className="text-xs text-zinc-400">Komposisi pesanan berdasarkan status</p>
@@ -751,8 +751,8 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 onClick={() => setSelectedStatusFilter(st)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                   selectedStatusFilter === st
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                    : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800 dark:hover:bg-zinc-800'
                 }`}
               >
                 {st === 'all' ? 'Semua' : st}
@@ -768,7 +768,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari No. Order / Pelanggan..."
-              className="w-full rounded-xl border border-zinc-300 bg-white py-1.5 pl-9 pr-3 text-xs shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+              className="w-full rounded-lg border border-zinc-300 bg-white py-1.5 pl-9 pr-3 text-xs shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </div>
         </div>
@@ -777,13 +777,13 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50/50 text-zinc-500 uppercase tracking-wider font-semibold dark:border-zinc-800 dark:bg-zinc-950/30">
-                <th className="py-3.5 px-4">No. Pesanan</th>
-                <th className="py-3.5 px-4">Pelanggan</th>
-                <th className="py-3.5 px-4">Waktu</th>
-                <th className="py-3.5 px-4 text-right">Total</th>
-                <th className="py-3.5 px-4 text-center">Status</th>
-                <th className="py-3.5 px-4 text-center">Aksi Cepat</th>
+              <tr className="border-b border-zinc-200/80 bg-zinc-50/70 text-zinc-500 uppercase tracking-wider font-semibold dark:border-zinc-800 dark:bg-zinc-950/30">
+                <th className="py-3 px-4">No. Pesanan</th>
+                <th className="py-3 px-4">Pelanggan</th>
+                <th className="py-3 px-4">Waktu</th>
+                <th className="py-3 px-4 text-right">Total</th>
+                <th className="py-3 px-4 text-center">Status</th>
+                <th className="py-3 px-4 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -803,47 +803,47 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                       className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40 transition"
                     >
                       {/* Order Number */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <button
                           type="button"
                           onClick={() => handleOpenDetailModal(order)}
-                          className="font-mono font-bold text-blue-600 hover:underline dark:text-blue-400"
+                          className="font-mono tabular-nums font-semibold text-zinc-900 hover:text-zinc-600 dark:text-zinc-100 dark:hover:text-zinc-400"
                         >
                           {order.order_number}
                         </button>
                       </td>
 
                       {/* Customer */}
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-zinc-900 dark:text-zinc-100">
+                      <td className="py-3 px-4">
+                        <div className="font-medium text-zinc-900 dark:text-zinc-100">
                           {order.customer_name}
                         </div>
-                        <div className="text-[11px] text-zinc-400">
+                        <div className="text-[11px] text-zinc-400 font-mono">
                           {order.customer_phone}
                         </div>
                       </td>
 
                       {/* Time */}
-                      <td className="py-3.5 px-4 text-zinc-500 whitespace-nowrap">
+                      <td className="py-3 px-4 text-zinc-500 whitespace-nowrap font-mono tabular-nums">
                         {formatDate(order.created_at)}
                       </td>
 
                       {/* Total */}
-                      <td className="py-3.5 px-4 text-right font-bold text-zinc-900 dark:text-zinc-100">
+                      <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">
                         {formatCurrency(order.total)}
                       </td>
 
                       {/* Status badge */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3 px-4 text-center">
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
+                          className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-medium border ${
                             order.status === 'Pending'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'
+                              ? 'bg-amber-50 text-amber-800 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/60'
                               : order.status === 'Processing'
-                              ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300'
+                              ? 'bg-zinc-100 text-zinc-800 border-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700'
                               : order.status === 'Completed'
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
-                              : 'bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-300'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/60'
+                              : 'bg-rose-50 text-rose-800 border-rose-200/80 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900/60'
                           }`}
                         >
                           {order.status}
@@ -1027,51 +1027,51 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
       {/* 4. Modal Detail Pesanan */}
       {activeModalOrder && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setActiveModalOrder(null)}
         >
           <div
-            className="relative w-full max-w-2xl rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] flex flex-col overflow-hidden"
+            className="relative w-full sm:max-w-2xl rounded-t-2xl sm:rounded-2xl border border-zinc-200/80 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[88dvh] sm:max-h-[85vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header (Sticky - Tidak ikut ter-scroll dan tombol X selalu terlihat) */}
-            <div className="flex items-center justify-between border-b border-zinc-100 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-200/80 bg-white/95 px-5 sm:px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
                   Detail Transaksi
                 </span>
-                <h3 className="text-lg font-mono font-black text-blue-600 dark:text-blue-400">
+                <h3 className="text-base sm:text-lg font-mono font-semibold text-zinc-900 dark:text-zinc-50">
                   {activeModalOrder.order_number}
                 </h3>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-zinc-500 font-mono tabular-nums">
                   Waktu: {formatDate(activeModalOrder.created_at)}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setActiveModalOrder(null)}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition"
                 aria-label="Tutup modal"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Scrollable Body */}
-            <div className="overflow-y-auto p-6 space-y-6 flex-1">
+            <div className="overflow-y-auto p-5 sm:p-6 space-y-5 flex-1">
               {/* Customer Details Box */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-2xl bg-zinc-50 p-4 text-xs dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-xl bg-zinc-50 p-3.5 text-xs dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800">
                 <div>
-                  <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
+                  <span className="font-semibold text-zinc-400 uppercase tracking-wider block text-[10px]">
                     Pelanggan
                   </span>
-                  <p className="font-semibold text-zinc-900 dark:text-zinc-100 mt-1">
+                  <p className="font-medium text-zinc-900 dark:text-zinc-100 mt-1">
                     {activeModalOrder.customer_name}
                   </p>
-                  <p className="text-zinc-500">{activeModalOrder.customer_phone}</p>
+                  <p className="text-zinc-500 font-mono">{activeModalOrder.customer_phone}</p>
                 </div>
                 <div>
-                  <span className="font-bold text-zinc-400 uppercase tracking-wider block text-[10px]">
+                  <span className="font-semibold text-zinc-400 uppercase tracking-wider block text-[10px]">
                     Alamat / Catatan
                   </span>
                   <p className="text-zinc-700 dark:text-zinc-300 mt-1 whitespace-pre-wrap">
@@ -1082,37 +1082,37 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
 
               {/* Items Table */}
               <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">
                   Daftar Produk yang Dipesan
                 </h4>
 
                 {modalItemsLoading ? (
                   <div className="flex items-center justify-center py-6">
-                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
                   </div>
                 ) : activeModalOrder.items && activeModalOrder.items.length > 0 ? (
-                  <div className="divide-y divide-zinc-100 border rounded-2xl overflow-hidden dark:divide-zinc-800 dark:border-zinc-800">
+                  <div className="divide-y divide-zinc-100 border border-zinc-200/80 rounded-xl overflow-hidden dark:divide-zinc-800 dark:border-zinc-800">
                     {activeModalOrder.items.map((item, i) => (
                       <div
                         key={item.id || i}
-                        className="flex items-center justify-between p-3.5 text-xs"
+                        className="flex items-center justify-between p-3 text-xs"
                       >
                         <div>
-                          <p className="font-semibold text-zinc-900 dark:text-zinc-100">
+                          <p className="font-medium text-zinc-900 dark:text-zinc-100">
                             {item.product_name_snapshot}
                           </p>
-                          <p className="text-zinc-400 text-[11px]">
+                          <p className="text-zinc-400 text-[11px] font-mono tabular-nums">
                             {item.quantity} x {formatCurrency(item.unit_price_snapshot)}
                           </p>
                         </div>
-                        <div className="font-bold text-zinc-900 dark:text-zinc-100">
+                        <div className="font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">
                           {formatCurrency(item.line_total)}
                         </div>
                       </div>
                     ))}
-                    <div className="flex justify-between p-3.5 bg-zinc-50 dark:bg-zinc-800/40 text-xs font-bold">
+                    <div className="flex justify-between p-3 bg-zinc-50 dark:bg-zinc-800/40 text-xs font-medium">
                       <span>Total Pembayaran</span>
-                      <span className="text-base font-black text-blue-600 dark:text-blue-400">
+                      <span className="text-sm font-semibold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
                         {formatCurrency(activeModalOrder.total)}
                       </span>
                     </div>
@@ -1125,30 +1125,30 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               </div>
 
               {/* Tombol Hubungi via WhatsApp (Tagihan & Verifikasi) */}
-              <div className="rounded-2xl bg-emerald-50/70 p-4 border border-emerald-100 dark:border-emerald-950 dark:bg-emerald-950/20">
+              <div className="rounded-xl bg-zinc-50 p-3.5 border border-zinc-200/80 dark:border-zinc-800 dark:bg-zinc-800/40">
                 <a
                   href={`https://wa.me/${formatIndonesianPhoneNumber(
                     activeModalOrder.customer_phone
                   )}?text=${generateWhatsAppBillingMessage(activeModalOrder)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-700 hover:scale-[1.01] active:scale-[0.99]"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-medium text-white transition hover:bg-emerald-700"
                 >
-                  <WhatsAppIcon className="h-5 w-5" />
+                  <WhatsAppIcon className="h-4 w-4" />
                   <span>Hubungi via WhatsApp (Tagihan & Verifikasi)</span>
                 </a>
                 <p className="mt-2 text-center text-[11px] text-zinc-500 dark:text-zinc-400">
-                  Otomatis memformat nomor ke <strong>{formatIndonesianPhoneNumber(activeModalOrder.customer_phone)}</strong> dan menyusun template rincian pesanan, alamat, & instruksi transfer bank.
+                  Format nomor ke <strong className="font-mono">{formatIndonesianPhoneNumber(activeModalOrder.customer_phone)}</strong> beserta template rincian pesanan.
                 </p>
               </div>
 
               {/* Change Status Controls */}
-              <div className="border-t border-zinc-100 pt-4 dark:border-zinc-800">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3">
+              <div className="border-t border-zinc-100 pt-3.5 dark:border-zinc-800">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2.5">
                   Ubah Status Pesanan
                 </h4>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {(['Pending', 'Processing', 'Completed', 'Cancelled'] as OrderStatus[]).map(
                     (st) => {
                       const isCurrent = activeModalOrder.status === st;
@@ -1161,15 +1161,15 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                           onClick={() =>
                             handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote)
                           }
-                          className={`rounded-xl px-3.5 py-2 text-xs font-semibold transition ${
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                             isCurrent
                               ? 'bg-zinc-200 text-zinc-500 cursor-default dark:bg-zinc-800 dark:text-zinc-500'
                               : st === 'Processing'
-                              ? 'bg-blue-600 text-white hover:bg-blue-700'
+                              ? 'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900'
                               : st === 'Completed'
                               ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                               : st === 'Cancelled'
-                              ? 'bg-red-600 text-white hover:bg-red-700'
+                              ? 'bg-rose-600 text-white hover:bg-rose-700'
                               : 'bg-amber-600 text-white hover:bg-amber-700'
                           }`}
                         >
@@ -1182,17 +1182,16 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
               </div>
             </div>
 
-            {/* Modal Footer (Sticky - Selalu terlihat di bawah) */}
-            <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/90 px-6 py-3.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/90 shrink-0">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-zinc-200/80 bg-zinc-50/80 px-5 sm:px-6 py-3 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 shrink-0">
               <span className="text-[11px] text-zinc-400">
-                Klik area blur luar untuk keluar
+                Klik luar untuk menutup
               </span>
               <button
                 type="button"
                 onClick={() => setActiveModalOrder(null)}
-                className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-2 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-4 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 transition"
               >
-                <X className="h-4 w-4" />
                 <span>Tutup</span>
               </button>
             </div>

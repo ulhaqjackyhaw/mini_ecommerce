@@ -293,7 +293,7 @@ export default function ProductManagementView({
         <button
           type="button"
           onClick={handleOpenCreateModal}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95"
+          className="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-3.5 py-2 text-xs font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           <Plus className="h-4 w-4" />
           <span>Tambah Produk Baru</span>
@@ -301,9 +301,9 @@ export default function ProductManagementView({
       </div>
 
       {/* Table Card */}
-      <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden">
+      <div className="rounded-xl border border-zinc-200/80 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden">
         {/* Controls */}
-        <div className="border-b border-zinc-200 p-4 sm:flex sm:items-center sm:justify-between gap-4 dark:border-zinc-800">
+        <div className="border-b border-zinc-200/80 p-4 sm:flex sm:items-center sm:justify-between gap-4 dark:border-zinc-800">
           {/* Category Filter */}
           <div className="flex flex-wrap items-center gap-1.5 mb-3 sm:mb-0">
             <button
@@ -311,8 +311,8 @@ export default function ProductManagementView({
               onClick={() => setSelectedCategory('all')}
               className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                 selectedCategory === 'all'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300'
+                  ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                  : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800'
               }`}
             >
               Semua ({products.length})
@@ -324,8 +324,8 @@ export default function ProductManagementView({
                 onClick={() => setSelectedCategory(c.id)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                   selectedCategory === c.id
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300'
+                    ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                    : 'bg-white text-zinc-600 border border-zinc-200/80 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-300 dark:border-zinc-800'
                 }`}
               >
                 {c.name}
@@ -341,7 +341,7 @@ export default function ProductManagementView({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari produk..."
-              className="w-full rounded-xl border border-zinc-300 bg-white py-1.5 pl-9 pr-3 text-xs shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+              className="w-full rounded-lg border border-zinc-300 bg-white py-1.5 pl-9 pr-3 text-xs shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
             />
           </div>
         </div>
@@ -575,33 +575,33 @@ export default function ProductManagementView({
       {/* Modal Add / Edit Product */}
       {isModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={() => setIsModalOpen(false)}
         >
           <div
-            className="relative w-full max-w-lg rounded-3xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[90vh] flex flex-col overflow-hidden"
+            className="relative w-full sm:max-w-lg rounded-t-2xl sm:rounded-2xl border border-zinc-200/80 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900 max-h-[88dvh] sm:max-h-[85vh] flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header (Sticky) */}
-            <div className="flex items-center justify-between border-b border-zinc-100 bg-white/95 px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
-              <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-zinc-200/80 bg-white/95 px-5 sm:px-6 py-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/95 shrink-0">
+              <h3 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-50">
                 {editingProduct ? 'Edit Data Produk' : 'Tambah Produk Baru'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 transition"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200 transition"
                 aria-label="Tutup modal"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {/* Scrollable Form Body */}
-            <form id="productForm" onSubmit={handleSaveProduct} className="overflow-y-auto p-6 space-y-4 text-xs flex-1">
+            <form id="productForm" onSubmit={handleSaveProduct} className="overflow-y-auto p-5 sm:p-6 space-y-4 text-xs flex-1">
               {/* Product Name */}
               <div>
-                <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                   Nama Produk <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -615,13 +615,13 @@ export default function ProductManagementView({
                     }
                   }}
                   placeholder="Contoh: Es Kopi Gula Aren"
-                  className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
               {/* Slug */}
               <div>
-                <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                   Slug (URL unik) <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -630,19 +630,19 @@ export default function ProductManagementView({
                   value={formSlug}
                   onChange={(e) => setFormSlug(e.target.value)}
                   placeholder="es-kopi-gula-aren"
-                  className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 font-mono shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 p-2 font-mono text-xs shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
               {/* Category */}
               <div>
-                <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                   Kategori
                 </label>
                 <select
                   value={formCategoryId}
                   onChange={(e) => setFormCategoryId(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                 >
                   <option value="">Pilih Kategori</option>
                   {categories.map((c) => (
@@ -656,7 +656,7 @@ export default function ProductManagementView({
               {/* Price & Stock */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                  <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                     Harga (IDR) <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -665,11 +665,11 @@ export default function ProductManagementView({
                     required
                     value={formPrice}
                     onChange={(e) => setFormPrice(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs font-mono tabular-nums shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                  <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                     Jumlah Stok <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -678,14 +678,14 @@ export default function ProductManagementView({
                     required
                     value={formStock}
                     onChange={(e) => setFormStock(Number(e.target.value))}
-                    className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                    className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs font-mono tabular-nums shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                   />
                 </div>
               </div>
 
               {/* Image URL */}
               <div>
-                <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                   URL Gambar (Opsional)
                 </label>
                 <input
@@ -693,13 +693,13 @@ export default function ProductManagementView({
                   value={formImageUrl}
                   onChange={(e) => setFormImageUrl(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block font-semibold uppercase text-zinc-700 dark:text-zinc-300">
+                <label className="block font-medium uppercase text-zinc-600 dark:text-zinc-400">
                   Deskripsi Singkat
                 </label>
                 <textarea
@@ -707,31 +707,31 @@ export default function ProductManagementView({
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
                   placeholder="Deskripsi produk atau bahan utama..."
-                  className="mt-1.5 w-full rounded-xl border border-zinc-300 p-2.5 shadow-sm dark:border-zinc-700 dark:bg-zinc-950"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 p-2 text-xs shadow-xs dark:border-zinc-700 dark:bg-zinc-950"
                 />
               </div>
 
               {/* Active Toggle */}
-              <div className="flex items-center gap-2 pt-2">
+              <div className="flex items-center gap-2 pt-1">
                 <input
                   type="checkbox"
                   id="modalIsActive"
                   checked={formIsActive}
                   onChange={(e) => setFormIsActive(e.target.checked)}
-                  className="h-4 w-4 rounded border-zinc-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
                 />
-                <label htmlFor="modalIsActive" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="modalIsActive" className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
                   Produk Aktif (Tampil di Katalog Toko)
                 </label>
               </div>
             </form>
 
-            {/* Modal Footer (Sticky) */}
-            <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/80 px-6 py-3.5 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 shrink-0">
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between border-t border-zinc-200/80 bg-zinc-50/80 px-5 sm:px-6 py-3 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80 shrink-0">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-xl border border-zinc-300 bg-white px-5 py-2.5 text-xs font-bold text-zinc-700 shadow-xs hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 transition"
+                className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 transition"
               >
                 Batal
               </button>
@@ -739,10 +739,10 @@ export default function ProductManagementView({
                 type="submit"
                 form="productForm"
                 disabled={isSaving}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 disabled:bg-blue-400 transition"
+                className="flex items-center gap-1.5 rounded-lg bg-zinc-900 px-4 py-2 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 transition"
               >
-                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-                <span>{editingProduct ? 'Simpan Perubahan' : 'Tambahkan Produk'}</span>
+                {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+                <span>{editingProduct ? 'Simpan' : 'Tambah Produk'}</span>
               </button>
             </div>
           </div>

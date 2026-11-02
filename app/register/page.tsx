@@ -86,33 +86,26 @@ export default function RegisterPage() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50"
+          className="inline-block text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-            <Package className="h-5 w-5" />
-          </div>
-          <span>QuickOrder</span>
+          QUICKORDER.
         </Link>
-        <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-zinc-900 sm:text-3xl dark:text-zinc-50">
+        <h2 className="mt-3 text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
           Daftar Akun Customer
         </h2>
-        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-          Buat akun untuk menyimpan riwayat pesanan dan auto-fill data saat checkout.
+        <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400">
+          Buat akun untuk menyimpan riwayat pesanan Anda.
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-6 shadow-xs dark:border-zinc-800 dark:bg-zinc-900 sm:p-8">
           {errorMessage && (
-            <div className="mb-6 flex items-start gap-3.5 rounded-2xl border border-rose-200/90 bg-rose-50/70 p-4 text-xs font-semibold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 shadow-xs animate-in fade-in">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-400">
-                <AlertCircle className="h-4 w-4" />
-              </div>
-              <div className="flex-1 pt-0.5">
-                <span className="block font-bold">Pendaftaran Gagal</span>
-                <span className="mt-0.5 block font-normal leading-relaxed text-zinc-600 dark:text-zinc-300">
-                  {errorMessage}
-                </span>
+            <div className="mb-6 flex items-start gap-3 rounded-lg border border-rose-200 bg-rose-50 p-3.5 text-xs font-medium text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+              <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+              <div>
+                <span className="font-semibold block">Pendaftaran Gagal</span>
+                <span className="text-[11px]">{errorMessage}</span>
               </div>
             </div>
           )}
@@ -238,7 +231,7 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-98 disabled:cursor-not-allowed disabled:bg-blue-400"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-zinc-900 py-2.5 text-xs sm:text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
               >
                 {isLoading ? (
                   <>
@@ -261,7 +254,7 @@ export default function RegisterPage() {
               Sudah memiliki akun?{' '}
               <Link
                 href="/login"
-                className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
+                className="font-medium text-zinc-900 hover:underline dark:text-zinc-100"
               >
                 Masuk di sini
               </Link>

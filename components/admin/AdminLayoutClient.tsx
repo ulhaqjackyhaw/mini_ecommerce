@@ -9,7 +9,6 @@ import {
   Boxes,
   LogOut,
   ExternalLink,
-  ShieldCheck,
   Menu,
   X,
   Radio,
@@ -78,20 +77,17 @@ export default function AdminLayoutClient({
     <AdminRealtimeContext.Provider
       value={{ status: realtimeStatus, setStatus: setRealtimeStatus }}
     >
-      <div className="flex min-h-screen bg-zinc-100 dark:bg-zinc-950">
+      <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-          {/* Brand */}
-          <div className="flex h-16 items-center gap-3 border-b border-zinc-200 px-6 dark:border-zinc-800">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <span className="block text-sm font-bold text-zinc-900 dark:text-zinc-100">
-                QuickOrder
+        <aside className="hidden lg:flex w-64 flex-col border-r border-zinc-200/80 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          {/* Brand Wordmark (No Generic AI Icon) */}
+          <div className="flex h-16 items-center justify-between border-b border-zinc-200/80 px-6 dark:border-zinc-800">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold tracking-tight text-zinc-900 text-base dark:text-zinc-50">
+                QUICKORDER.
               </span>
-              <span className="block text-[10px] font-semibold text-blue-600 uppercase tracking-wider dark:text-blue-400">
-                Admin Panel
+              <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                Admin
               </span>
             </div>
           </div>
@@ -105,54 +101,53 @@ export default function AdminLayoutClient({
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition ${
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium transition ${
                     active
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400'
+                      ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
                       : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200'
                   }`}
                 >
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4 stroke-[1.75]" />
                   <span>{link.name}</span>
                 </Link>
               );
             })}
 
-            <div className="pt-4">
+            <div className="pt-4 mt-4 border-t border-zinc-100 dark:border-zinc-800/80">
               <Link
                 href="/"
                 target="_blank"
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+                className="flex items-center justify-between rounded-lg px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
               >
                 <span className="flex items-center gap-2">
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-3.5 w-3.5 stroke-[1.75]" />
                   <span>Lihat Toko Publik</span>
                 </span>
-                <span className="text-[10px] text-zinc-400">Baru</span>
               </Link>
             </div>
           </nav>
 
           {/* Realtime Status Indicator & User Info */}
-          <div className="border-t border-zinc-200 p-4 dark:border-zinc-800 space-y-3">
+          <div className="border-t border-zinc-200/80 p-4 dark:border-zinc-800 space-y-3">
             {/* Realtime Pill */}
-            <div className="flex items-center justify-between rounded-xl bg-zinc-50 px-3 py-2 text-xs dark:bg-zinc-800/50">
-              <span className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400">
-                <Radio className="h-3.5 w-3.5 text-blue-500" />
+            <div className="flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2 text-xs dark:bg-zinc-800/50">
+              <span className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                <Radio className="h-3.5 w-3.5" />
                 <span>Supabase Live</span>
               </span>
               <span className="flex items-center gap-1.5">
                 <span
                   className={`h-2 w-2 rounded-full ${
                     realtimeStatus === 'CONNECTED'
-                      ? 'bg-emerald-500 animate-pulse'
+                      ? 'bg-emerald-500'
                       : realtimeStatus === 'CONNECTING'
-                      ? 'bg-amber-500 animate-ping'
-                      : 'bg-red-500'
+                      ? 'bg-amber-500'
+                      : 'bg-zinc-400'
                   }`}
                 />
-                <span className="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">
+                <span className="text-[11px] font-mono text-zinc-700 dark:text-zinc-300">
                   {realtimeStatus === 'CONNECTED'
-                    ? 'Live'
+                    ? 'Connected'
                     : realtimeStatus === 'CONNECTING'
                     ? 'Connecting'
                     : 'Offline'}
@@ -174,82 +169,91 @@ export default function AdminLayoutClient({
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-red-400 dark:hover:bg-red-950/40"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Keluar (Logout)</span>
+              <span>Keluar</span>
             </button>
           </div>
         </aside>
 
         {/* Mobile Top Header */}
         <div className="flex flex-1 flex-col min-w-0">
-          <header className="flex h-16 items-center justify-between border-b border-zinc-200 bg-white px-4 lg:hidden dark:border-zinc-800 dark:bg-zinc-900">
+          <header className="flex h-15 items-center justify-between border-b border-zinc-200/80 bg-white px-4 lg:hidden dark:border-zinc-800 dark:bg-zinc-900">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-6 w-6 text-blue-600" />
-              <span className="font-bold text-zinc-900 dark:text-zinc-100">
-                Admin Panel
+              <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                QUICKORDER.
+              </span>
+              <span className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                Admin
               </span>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+              <span className="flex items-center gap-1.5 rounded-md bg-zinc-100 px-2 py-1 text-[10px] font-mono text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
                     realtimeStatus === 'CONNECTED' ? 'bg-emerald-500' : 'bg-amber-500'
                   }`}
                 />
-                {realtimeStatus === 'CONNECTED' ? 'Live' : 'Connecting'}
+                <span>Live</span>
               </span>
 
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen((p) => !p)}
-                className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300"
+                aria-label="Toggle navigation menu"
               >
-                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
               </button>
             </div>
           </header>
 
-          {/* Mobile Drawer */}
+          {/* Mobile Dropdown Menu */}
           {mobileMenuOpen && (
-            <div className="border-b border-zinc-200 bg-white p-4 lg:hidden dark:border-zinc-800 dark:bg-zinc-900 space-y-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold ${
-                    pathname === link.href
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400'
-                      : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400'
-                  }`}
-                >
-                  <link.icon className="h-4 w-4" />
-                  <span>{link.name}</span>
-                </Link>
-              ))}
-
-              <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800 flex items-center justify-between">
+            <div className="border-b border-zinc-200 bg-white p-4 lg:hidden dark:border-zinc-800 dark:bg-zinc-900">
+              <nav className="space-y-1">
+                {navLinks.map((link) => {
+                  const active = pathname === link.href;
+                  const Icon = link.icon;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium ${
+                        active
+                          ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900'
+                          : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{link.name}</span>
+                    </Link>
+                  );
+                })}
                 <Link
                   href="/"
                   target="_blank"
-                  className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400"
                 >
                   <ExternalLink className="h-4 w-4" />
                   <span>Lihat Toko Publik</span>
                 </Link>
-
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-red-600"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400"
                 >
-                  <LogOut className="h-3.5 w-3.5" />
-                  <span>Keluar</span>
+                  <LogOut className="h-4 w-4" />
+                  <span>Keluar (Logout)</span>
                 </button>
-              </div>
+              </nav>
             </div>
           )}
 
@@ -262,4 +266,3 @@ export default function AdminLayoutClient({
     </AdminRealtimeContext.Provider>
   );
 }
-

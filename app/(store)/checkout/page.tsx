@@ -9,15 +9,12 @@ import { formatCurrency } from '@/lib/utils';
 import {
   ArrowLeft,
   ShoppingBag,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   Loader2,
   User,
   Phone,
   MapPin,
-  Lock,
-  Sparkles,
 } from 'lucide-react';
 
 export default function CheckoutPage() {
@@ -52,7 +49,7 @@ export default function CheckoutPage() {
   if (!isInitialized) {
     return (
       <div className="flex flex-1 items-center justify-center py-24">
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-zinc-900 border-t-transparent dark:border-zinc-100" />
       </div>
     );
   }
@@ -60,18 +57,18 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto flex max-w-2xl flex-1 flex-col items-center justify-center px-4 py-24 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-blue-50 text-blue-600 dark:bg-zinc-800 dark:text-blue-400">
-          <ShoppingBag className="h-10 w-10" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 text-zinc-400 dark:bg-zinc-800">
+          <ShoppingBag className="h-8 w-8" />
         </div>
-        <h2 className="mt-6 text-2xl font-black text-zinc-900 dark:text-zinc-100">
-          Keranjang Belanja Masih Kosong
+        <h2 className="mt-5 text-xl font-bold text-zinc-900 dark:text-zinc-100">
+          Keranjang Belanja Kosong
         </h2>
-        <p className="mt-2 text-sm text-zinc-500 max-w-sm">
-          Pilih produk favorit Anda di katalog terlebih dahulu untuk melanjutkan pemesanan.
+        <p className="mt-2 text-xs sm:text-sm text-zinc-500 max-w-sm">
+          Pilih produk favorit di katalog terlebih dahulu.
         </p>
         <Link
           href="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-blue-600 px-7 py-3.5 text-sm font-bold text-white shadow-md shadow-blue-500/25 transition hover:bg-blue-700 hover:scale-[1.02]"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-6 py-2.5 text-xs sm:text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           <span>Kembali ke Katalog</span>
         </Link>
@@ -83,7 +80,6 @@ export default function CheckoutPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    // Client-side quick validation
     if (!customerName.trim()) {
       setErrorMessage('Nama lengkap wajib diisi.');
       return;
@@ -96,7 +92,6 @@ export default function CheckoutPage() {
     setIsSubmitting(true);
 
     try {
-      // Idempotency key per checkout attempt
       const idempotencyKey =
         typeof crypto !== 'undefined' && crypto.randomUUID
           ? crypto.randomUUID()
@@ -122,116 +117,79 @@ export default function CheckoutPage() {
         body: JSON.stringify(payload),
       });
 
-      const json = await res.json();
+      const data = await res.json();
 
-      if (!res.ok || !json.success) {
-        setErrorMessage(
-          json.message || 'Gagal memproses checkout. Silakan periksa kembali data Anda.'
-        );
+      if (!res.ok || !data.success) {
+        setErrorMessage(data.message || 'Terjadi kesalahan saat memproses pesanan.');
         setIsSubmitting(false);
         return;
       }
 
-      const orderData = json.data;
-
-      // Simpan tracking token di localStorage untuk kemudahan akses
-      try {
-        const storedTokens = JSON.parse(
-          localStorage.getItem('mini_ecommerce_tracking_tokens') || '{}'
-        );
-        storedTokens[orderData.order_number] = orderData.tracking_token;
-        localStorage.setItem(
-          'mini_ecommerce_tracking_tokens',
-          JSON.stringify(storedTokens)
-        );
-      } catch {
-        // Abaikan
-      }
-
-      // Kosongkan keranjang setelah berhasil checkout
       clearCart();
-
-      // Redirect otomatis langsung ke halaman Digital Invoice
-      router.push(`/invoice/${orderData.order_number}`);
-    } catch (err: unknown) {
-      console.error('Checkout error:', err);
-      setErrorMessage('Terjadi masalah koneksi jaringan server. Silakan coba lagi.');
+      router.push(`/invoice/${data.data.order_number}`);
+    } catch (err: any) {
+      console.error('Checkout submit error:', err);
+      setErrorMessage('Terjadi gangguan jaringan. Silakan periksa koneksi Anda.');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full min-h-[calc(100vh-5rem)] bg-slate-50/60 dark:bg-zinc-950/60">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        {/* Tombol kembali */}
+    <div className="w-full min-h-[calc(100vh-5rem)] bg-zinc-50/50 dark:bg-zinc-950/40 py-8">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <Link
             href="/cart"
-            className="inline-flex items-center gap-2 text-sm font-bold text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span>← Kembali ke Keranjang</span>
+            <span>Kembali ke Keranjang</span>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
-          {/* Kolom Kiri: Formulir Checkout yang Luas & Besar (7 Cols) */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+          {/* Kolom Kiri: Form Checkout (7 Cols) */}
           <div className="lg:col-span-7">
-            <div className="rounded-3xl border border-zinc-200/90 bg-white p-7 sm:p-10 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="flex items-start justify-between border-b border-zinc-100 pb-6 dark:border-zinc-800">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 mb-2">
-                    <Sparkles className="h-3.5 w-3.5" />
-                    <span>Pemesanan Cepat & Instan</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-50">
-                    {loggedInUserId ? 'Customer Checkout' : 'Guest Checkout'}
-                  </h1>
-                  <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                    {loggedInUserId
-                      ? `Data formulir otomatis terisi dari akun profil Anda (${loggedInUserEmail}).`
-                      : 'Pesan langsung tanpa perlu login atau registrasi akun.'}
-                  </p>
-                </div>
-                <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-zinc-800 dark:text-blue-400 shadow-xs">
-                  <ShieldCheck className="h-6 w-6" />
-                </div>
+            <div className="rounded-xl border border-zinc-200/80 bg-white p-6 sm:p-7 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+                  {loggedInUserId ? 'Konfirmasi Checkout' : 'Guest Checkout'}
+                </h1>
+                <p className="mt-1 text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
+                  {loggedInUserId
+                    ? `Data formulir terisi dari akun profil Anda (${loggedInUserEmail}).`
+                    : 'Pemesanan cepat tanpa harus login atau registrasi akun.'}
+                </p>
               </div>
 
               {loggedInUserId && (
-                <div className="mt-5 flex items-center justify-between rounded-2xl bg-blue-50/80 p-4 text-xs sm:text-sm text-blue-900 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-100 dark:border-blue-900/60">
-                  <span className="flex items-center gap-2 font-semibold">
-                    <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                    <span>Akun Customer Terhubung: Riwayat pesanan otomatis tercatat di dashboard akun Anda.</span>
-                  </span>
+                <div className="mt-4 flex items-center gap-2 rounded-lg bg-zinc-100 px-3 py-2 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                  <span>Akun Customer Terhubung: Riwayat pesanan otomatis tersimpan.</span>
                 </div>
               )}
 
               {errorMessage && (
-                <div className="mt-6 flex items-start gap-3.5 rounded-2xl border border-rose-200/90 bg-rose-50/70 p-4 text-xs sm:text-sm font-semibold text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200 shadow-xs animate-in fade-in">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-900/60 dark:text-rose-400">
-                    <AlertCircle className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1 pt-0.5">
-                    <span className="block font-bold">Periksa Kembali Data Anda</span>
-                    <span className="mt-0.5 block font-normal leading-relaxed text-zinc-600 dark:text-zinc-300">
-                      {errorMessage}
-                    </span>
+                <div className="mt-4 flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-rose-600" />
+                  <div>
+                    <span className="font-semibold block">Gagal Memproses Pesanan</span>
+                    <span className="text-[11px]">{errorMessage}</span>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 {/* Nama Lengkap */}
                 <div>
                   <label
                     htmlFor="customer_name"
-                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                    className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
                   >
                     Nama Lengkap <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative mt-2">
-                    <User className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+                  <div className="relative mt-1">
+                    <User className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                     <input
                       id="customer_name"
                       type="text"
@@ -240,7 +198,7 @@ export default function CheckoutPage() {
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="Contoh: Budi Santoso"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-3 text-xs sm:text-sm shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                     />
                   </div>
                 </div>
@@ -249,12 +207,12 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="customer_phone"
-                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                    className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
                   >
                     Nomor WhatsApp / Telepon <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative mt-2">
-                    <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
+                  <div className="relative mt-1">
+                    <Phone className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
                     <input
                       id="customer_phone"
                       type="tel"
@@ -263,11 +221,11 @@ export default function CheckoutPage() {
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       placeholder="Contoh: 081234567890"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-3 text-xs sm:text-sm font-mono shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                     />
                   </div>
-                  <p className="mt-1.5 text-xs text-zinc-400">
-                    Digunakan untuk konfirmasi pesanan dan informasi pengiriman.
+                  <p className="mt-1 text-[11px] text-zinc-400">
+                    Digunakan untuk konfirmasi pesanan via WhatsApp.
                   </p>
                 </div>
 
@@ -275,72 +233,74 @@ export default function CheckoutPage() {
                 <div>
                   <label
                     htmlFor="customer_address"
-                    className="block text-xs sm:text-sm font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300"
+                    className="block text-xs font-medium uppercase tracking-wider text-zinc-600 dark:text-zinc-400"
                   >
-                    Alamat Pengiriman / Catatan Pesanan{' '}
+                    Alamat Pengiriman / Catatan{' '}
                     <span className="text-zinc-400 font-normal lowercase">(opsional)</span>
                   </label>
-                  <div className="relative mt-2">
-                    <MapPin className="pointer-events-none absolute left-4 top-4 h-5 w-5 text-zinc-400" />
+                  <div className="relative mt-1">
+                    <MapPin className="pointer-events-none absolute left-3.5 top-3 h-4 w-4 text-zinc-400" />
                     <textarea
                       id="customer_address"
                       rows={3}
                       value={customerAddress}
                       onChange={(e) => setCustomerAddress(e.target.value)}
-                      placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau catatan 'Es sedikit saja'"
+                      placeholder="Contoh: Jl. Sudirman No. 12, RT 02 / RW 04, atau catatan 'Es sedikit'"
                       disabled={isSubmitting}
-                      className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-4 text-sm sm:text-base font-medium shadow-xs transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-3 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                      className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-3 text-xs sm:text-sm shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
                     />
                   </div>
                 </div>
 
-                {/* Tombol Buat Pesanan yang Besar & Jelas */}
-                <div className="pt-3">
+                {/* Tombol Buat Pesanan */}
+                <div className="pt-2">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-600 py-4 px-6 text-sm sm:text-base font-black text-white shadow-lg shadow-blue-500/25 transition-all hover:bg-blue-700 hover:shadow-xl active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-blue-400"
+                    className="flex w-full items-center justify-between rounded-lg bg-zinc-900 py-3 px-4 text-xs sm:text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
                   >
                     {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span>Memproses Pesanan & Menerbitkan Invoice...</span>
-                      </>
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Memproses Pesanan...</span>
+                      </span>
                     ) : (
                       <>
-                        <CheckCircle2 className="h-5 w-5 stroke-[2.5]" />
-                        <span>Buat Pesanan & Dapatkan Invoice ({formatCurrency(total)})</span>
+                        <span>Buat Pesanan & Dapatkan Invoice</span>
+                        <span className="font-mono tabular-nums font-semibold">
+                          {formatCurrency(total)}
+                        </span>
                       </>
                     )}
                   </button>
-                  <p className="mt-2 text-center text-xs text-zinc-400">
-                    Setelah tombol ditekan, Anda akan langsung diarahkan ke halaman Invoice Digital resmi.
+                  <p className="mt-2 text-center text-[11px] text-zinc-400">
+                    Setelah tombol ditekan, Anda akan diarahkan ke invoice digital.
                   </p>
                 </div>
               </form>
             </div>
           </div>
 
-          {/* Kolom Kanan: Ringkasan Item Pesanan yang Lengkap (5 Cols) */}
-          <div className="lg:col-span-5 sticky top-24">
-            <div className="rounded-3xl border border-zinc-200/90 bg-white p-7 sm:p-8 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
-                <h2 className="text-lg font-black text-zinc-900 dark:text-zinc-100">
+          {/* Kolom Kanan: Ringkasan Item Pesanan (5 Cols) */}
+          <div className="lg:col-span-5 sticky top-20">
+            <div className="rounded-xl border border-zinc-200/80 bg-white p-5 sm:p-6 shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="flex items-center justify-between border-b border-zinc-100 pb-3 dark:border-zinc-800">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
                   Rincian Item ({totalItems})
                 </h2>
                 <Link
                   href="/cart"
-                  className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                  className="text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition"
                 >
                   Ubah
                 </Link>
               </div>
 
               {/* Scrollable Items List */}
-              <div className="mt-4 divide-y divide-zinc-100 max-h-96 overflow-y-auto pr-2 dark:divide-zinc-800">
+              <div className="mt-3 divide-y divide-zinc-100 max-h-80 overflow-y-auto pr-1 dark:divide-zinc-800">
                 {items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 py-3.5">
-                    <div className="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800 shadow-xs">
+                  <div key={item.id} className="flex items-center gap-3 py-2.5">
+                    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">
                       {item.image_url ? (
                         <Image
                           src={item.image_url}
@@ -350,42 +310,42 @@ export default function CheckoutPage() {
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-zinc-400">
-                          <ShoppingBag className="h-5 w-5" />
+                          <ShoppingBag className="h-4 w-4" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="truncate text-sm font-bold text-zinc-900 dark:text-zinc-100">
+                      <p className="truncate text-xs font-medium text-zinc-900 dark:text-zinc-100">
                         {item.name}
                       </p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      <p className="text-[11px] text-zinc-400 font-mono tabular-nums">
                         {item.quantity} × {formatCurrency(item.price)}
                       </p>
                     </div>
-                    <div className="text-right text-sm font-black text-zinc-900 dark:text-zinc-100">
+                    <div className="text-right text-xs font-semibold font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
                       {formatCurrency(item.price * item.quantity)}
                     </div>
                   </div>
                 ))}
               </div>
 
-              {/* Kalkulasi Subtotal & Total */}
-              <div className="mt-5 border-t border-zinc-200 pt-5 space-y-3 dark:border-zinc-800">
-                <div className="flex justify-between text-sm text-zinc-500 dark:text-zinc-400">
-                  <span>Subtotal Belanja</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-200">
+              {/* Subtotal & Total */}
+              <div className="mt-4 border-t border-zinc-100 pt-3 space-y-2 text-xs dark:border-zinc-800">
+                <div className="flex justify-between text-zinc-500">
+                  <span>Subtotal</span>
+                  <span className="font-mono tabular-nums text-zinc-900 dark:text-zinc-100">
                     {formatCurrency(subtotal)}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-zinc-400">
-                  <span>Biaya Pengiriman</span>
-                  <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                    Gratis (Promo Toko)
+                <div className="flex justify-between text-zinc-500">
+                  <span>Ongkos Kirim</span>
+                  <span className="text-emerald-600 font-medium dark:text-emerald-400">
+                    Gratis
                   </span>
                 </div>
-                <div className="flex justify-between border-t border-zinc-200/80 pt-3 text-base sm:text-lg font-black dark:border-zinc-800">
+                <div className="flex justify-between border-t border-zinc-100 pt-2.5 text-sm font-semibold dark:border-zinc-800">
                   <span className="text-zinc-900 dark:text-zinc-100">Total Pembayaran</span>
-                  <span className="text-xl sm:text-2xl text-blue-600 dark:text-blue-400">
+                  <span className="text-base font-bold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
                     {formatCurrency(total)}
                   </span>
                 </div>

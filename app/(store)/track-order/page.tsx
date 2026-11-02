@@ -127,7 +127,7 @@ function TrackOrderContent() {
       </div>
 
       {/* Search Bar */}
-      <div className="mx-auto mt-8 max-w-xl">
+      <div className="mx-auto mt-6 max-w-lg">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -135,27 +135,27 @@ function TrackOrderContent() {
           }}
           className="relative flex items-center"
         >
-          <Search className="pointer-events-none absolute left-4 h-5 w-5 text-zinc-400" />
+          <Search className="pointer-events-none absolute left-3.5 h-4 w-4 text-zinc-400" />
           <input
             type="text"
             value={orderNumber}
             onChange={(e) => setOrderNumber(e.target.value)}
             placeholder="Contoh: ORD-20261102-ABC123XYZ456"
-            className="w-full rounded-2xl border border-zinc-300 bg-white py-3.5 pl-12 pr-28 text-sm shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-full rounded-lg border border-zinc-300 bg-white py-2 pl-9 pr-24 text-xs sm:text-sm font-mono shadow-xs transition placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
           <button
             type="submit"
             disabled={isSearching}
-            className="absolute right-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-blue-400"
+            className="absolute right-1.5 rounded-md bg-zinc-900 px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
           >
-            {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Lacak'}
+            {isSearching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Lacak'}
           </button>
         </form>
 
         {/* Quick Recent Orders */}
         {recentOrders.length > 0 && !orderData && (
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <span className="text-xs text-zinc-400">Pesanan Terakhir Anda:</span>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            <span className="text-[11px] text-zinc-400">Terakhir:</span>
             {recentOrders.slice(0, 3).map((num) => (
               <button
                 key={num}
@@ -164,7 +164,7 @@ function TrackOrderContent() {
                   setOrderNumber(num);
                   handleTrack(num);
                 }}
-                className="rounded-lg bg-zinc-100 px-2.5 py-1 text-xs font-mono text-zinc-700 transition hover:bg-blue-50 hover:text-blue-600 dark:bg-zinc-800 dark:text-zinc-300"
+                className="rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-mono tabular-nums text-zinc-700 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
               >
                 {num}
               </button>
@@ -175,37 +175,36 @@ function TrackOrderContent() {
 
       {/* Error Message */}
       {errorMessage && (
-        <div className="mx-auto mt-6 max-w-xl flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-xs font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300">
-          <AlertCircle className="h-5 w-5 flex-shrink-0 text-red-600" />
+        <div className="mx-auto mt-4 max-w-lg flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
           <span>{errorMessage}</span>
         </div>
       )}
 
       {/* Tracking Results View */}
       {orderData && (
-        <div className="mt-10 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mt-8 overflow-hidden rounded-xl border border-zinc-200/80 bg-white shadow-xs dark:border-zinc-800 dark:bg-zinc-900">
           {/* Header */}
-          <div className="border-b border-zinc-200 bg-zinc-50 p-6 sm:flex sm:items-center sm:justify-between dark:border-zinc-800 dark:bg-zinc-950/40">
+          <div className="border-b border-zinc-200/80 bg-zinc-50/50 p-5 sm:flex sm:items-center sm:justify-between dark:border-zinc-800 dark:bg-zinc-950/30">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                 Nomor Pesanan
               </span>
-              <h2 className="text-xl font-mono font-extrabold text-blue-600 dark:text-blue-400">
+              <h2 className="text-base sm:text-lg font-mono font-semibold tabular-nums text-zinc-900 dark:text-zinc-50">
                 {orderData.order_number}
               </h2>
-              <p className="mt-0.5 text-xs text-zinc-500">
-                Pelanggan: <strong className="text-zinc-800 dark:text-zinc-200">{orderData.customer_name}</strong> •{' '}
-                {formatDate(orderData.created_at)}
+              <p className="mt-0.5 text-xs text-zinc-500 font-mono tabular-nums">
+                {orderData.customer_name} • {formatDate(orderData.created_at)}
               </p>
             </div>
 
-            <div className="mt-4 sm:mt-0">
+            <div className="mt-3 sm:mt-0">
               <Link
                 href={`/invoice/${orderData.order_number}`}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-300 bg-white px-4 py-2 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 transition"
               >
-                <FileText className="h-4 w-4" />
-                <span>Lihat Invoice Lengkap</span>
+                <FileText className="h-3.5 w-3.5" />
+                <span>Lihat Invoice</span>
               </Link>
             </div>
           </div>
