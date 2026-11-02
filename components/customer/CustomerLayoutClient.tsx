@@ -67,19 +67,11 @@ export default function CustomerLayoutClient({
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-2xl border border-zinc-300 bg-white px-5 py-3 text-sm font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="inline-flex items-center gap-2 rounded-2xl border border-zinc-300 bg-white px-5 py-2.5 text-sm font-bold text-zinc-700 shadow-xs transition hover:bg-zinc-50 hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
             >
               <Store className="h-4 w-4 text-blue-600" />
               <span>Katalog Belanja</span>
             </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="inline-flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50/80 px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-100 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-400"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Keluar</span>
-            </button>
           </div>
         </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useCart } from '@/components/cart/CartProvider';
 import { createClient } from '@/lib/supabase/client';
 import Logo from '@/components/ui/Logo';
@@ -16,14 +16,18 @@ import {
   Store,
   User,
   LogIn,
+  LogOut,
+  Loader2,
 } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { totalItems, isInitialized } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userRole, setUserRole] = useState<'admin' | 'customer' | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     try {
@@ -64,6 +68,24 @@ export default function Navbar() {
       setUserRole(null);
     }
   }, [pathname]);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      setIsLoggedIn(false);
+      setUserRole(null);
+      setMobileMenuOpen(false);
+      router.push('/login');
+      router.refresh();
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   // SEMBUNYIKAN NAVBAR PUBLIK SAAT BERADA DI HALAMAN ADMIN AGAR TIDAK DOUBLE NAVBAR
   if (pathname.startsWith('/admin')) {
@@ -162,6 +184,25 @@ export default function Navbar() {
                 <User className="h-4 w-4" strokeWidth={1.75} />
                 <span>Profil</span>
               </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="inline-flex h-10 sm:h-11 items-center gap-2 rounded-xl border border-red-200 bg-red-50/80 px-3.5 sm:px-4 text-sm font-bold text-red-600 hover:bg-red-100 hover:border-red-300 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-400 dark:hover:bg-red-950/80 transition-all shadow-xs disabled:opacity-60 disabled:cursor-wait"
+                title="Keluar dari akun"
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-red-600 dark:text-red-400" />
+                    <span>Keluar...</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="h-4 w-4 stroke-[2]" />
+                    <span>Keluar</span>
+                  </>
+                )}
+              </button>
             </div>
           ) : (
             <Link
@@ -246,6 +287,24 @@ export default function Navbar() {
                     <User className="h-4 w-4" strokeWidth={1.75} />
                     <span>Profil Customer</span>
                   </Link>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40 disabled:opacity-60 transition"
+                  >
+                    {isLoggingOut ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                        <span>Sedang keluar...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="h-4 w-4 stroke-[2]" />
+                        <span>Keluar dari Akun</span>
+                      </>
+                    )}
+                  </button>
                 </>
               ) : (
                 <Link

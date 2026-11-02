@@ -14,6 +14,7 @@ import {
   X,
   Radio,
   User,
+  Loader2,
 } from 'lucide-react';
 
 interface RealtimeContextType {
@@ -40,6 +41,7 @@ export default function AdminLayoutClient({
   const [realtimeStatus, setRealtimeStatus] = useState<
     'CONNECTED' | 'CONNECTING' | 'DISCONNECTED'
   >('CONNECTED');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,6 +53,8 @@ export default function AdminLayoutClient({
   }, []);
 
   const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
     try {
       const supabase = createClient();
       await supabase.auth.signOut();
@@ -58,6 +62,7 @@ export default function AdminLayoutClient({
       router.refresh();
     } catch (err) {
       console.error('Logout error:', err);
+      setIsLoggingOut(false);
     }
   };
 
@@ -168,10 +173,20 @@ export default function AdminLayoutClient({
             <button
               type="button"
               onClick={handleLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+              disabled={isLoggingOut}
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white py-2 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-60 disabled:cursor-wait dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              <span>Keluar</span>
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-zinc-600 dark:text-zinc-400" />
+                  <span>Keluar...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-3.5 w-3.5" />
+                  <span>Keluar</span>
+                </>
+              )}
             </button>
           </div>
         </aside>
@@ -245,10 +260,20 @@ export default function AdminLayoutClient({
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400"
+                  disabled={isLoggingOut}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 disabled:opacity-60"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span>Keluar (Logout)</span>
+                  {isLoggingOut ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-red-600" />
+                      <span>Sedang keluar...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="h-4 w-4" />
+                      <span>Keluar (Logout)</span>
+                    </>
+                  )}
                 </button>
               </nav>
             </div>

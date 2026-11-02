@@ -895,7 +895,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                                 onClick={() => handleUpdateStatus(order.id, 'Cancelled')}
                                 className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-950/50 dark:text-red-400"
                               >
-                                Batal
+                                {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Batal'}
                               </button>
                             </>
                           )}
@@ -916,7 +916,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                                 onClick={() => handleUpdateStatus(order.id, 'Cancelled')}
                                 className="rounded-lg bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 hover:bg-red-100 dark:bg-red-950/50 dark:text-red-400"
                               >
-                                Batal
+                                {isUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Batal'}
                               </button>
                             </>
                           )}
@@ -1169,16 +1169,17 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                   {(['Pending', 'Processing', 'Completed', 'Cancelled'] as OrderStatus[]).map(
                     (st) => {
                       const isCurrent = activeModalOrder.status === st;
+                      const isThisUpdating = isUpdatingStatus === activeModalOrder.id;
 
                       return (
                         <button
                           key={st}
                           type="button"
-                          disabled={isCurrent || isUpdatingStatus === activeModalOrder.id}
+                          disabled={isCurrent || isThisUpdating}
                           onClick={() =>
                             handleUpdateStatus(activeModalOrder.id, st, statusUpdateNote)
                           }
-                          className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                             isCurrent
                               ? 'bg-zinc-200 text-zinc-500 cursor-default dark:bg-zinc-800 dark:text-zinc-500'
                               : st === 'Processing'
@@ -1190,7 +1191,16 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                               : 'bg-amber-600 text-white hover:bg-amber-700'
                           }`}
                         >
-                          {isCurrent ? `Saat ini: ${st}` : `Ubah ke ${st}`}
+                          {isThisUpdating ? (
+                            <>
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <span>Memproses...</span>
+                            </>
+                          ) : isCurrent ? (
+                            `Saat ini: ${st}`
+                          ) : (
+                            `Ubah ke ${st}`
+                          )}
                         </button>
                       );
                     }
