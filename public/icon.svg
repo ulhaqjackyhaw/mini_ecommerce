@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="512" height="512">
+  <rect width="32" height="32" rx="7" fill="#09090b"/>
+  <!-- Stylized Modern "A" Bag Motif -->
+  <path d="M8 24h16" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round"/>
+  <path d="M16 6L8 24" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 6l8 18" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M11.25 17h9.5" stroke="#ffffff" stroke-width="2.25" stroke-linecap="round"/>
+</svg>
