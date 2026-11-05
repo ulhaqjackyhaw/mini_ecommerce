@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { createClient } from '@/lib/supabase/client';
 import { useAdminRealtime } from '@/components/admin/AdminLayoutClient';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatCurrencyIDR, formatDate, formatRelativeTime } from '@/lib/utils';
 import type { Order, OrderItem, OrderStatus } from '@/types/database';
 import { useDialog } from '@/components/ui/DialogProvider';
 import {
@@ -800,6 +800,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 <th className="py-3 px-4">No. Pesanan</th>
                 <th className="py-3 px-4">Pelanggan</th>
                 <th className="py-3 px-4">Waktu</th>
+                <th className="py-3 px-4">Keterangan Waktu</th>
                 <th className="py-3 px-4 text-right">Total</th>
                 <th className="py-3 px-4 text-center">Status</th>
                 <th className="py-3 px-4 text-center">Aksi</th>
@@ -808,7 +809,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-zinc-400">
+                  <td colSpan={7} className="py-12 text-center text-zinc-400">
                     Tidak ada transaksi yang cocok dengan filter.
                   </td>
                 </tr>
@@ -847,9 +848,17 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                         {formatDate(order.created_at)}
                       </td>
 
+                      {/* Relative Time (Keterangan Waktu) */}
+                      <td className="py-3 px-4 text-zinc-600 dark:text-zinc-400 whitespace-nowrap text-xs">
+                        <span className="inline-flex items-center gap-1.5 font-medium">
+                          <Clock className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                          <span>{formatRelativeTime(order.created_at)}</span>
+                        </span>
+                      </td>
+
                       {/* Total */}
                       <td className="py-3 px-4 text-right font-mono tabular-nums font-semibold text-zinc-900 dark:text-zinc-100">
-                        {formatCurrency(order.total)}
+                        {formatCurrencyIDR(order.total)}
                       </td>
 
                       {/* Status badge */}
@@ -975,11 +984,11 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                         {order.customer_name}
                       </span>
                       <span className="block text-[11px] text-zinc-400">
-                        {formatDate(order.created_at)}
+                        {formatDate(order.created_at)} • {formatRelativeTime(order.created_at)}
                       </span>
                     </div>
-                    <span className="text-sm font-extrabold text-zinc-900 dark:text-zinc-50">
-                      {formatCurrency(order.total)}
+                    <span className="text-sm font-extrabold text-zinc-900 dark:text-zinc-50 font-mono tabular-nums">
+                      {formatCurrencyIDR(order.total)}
                     </span>
                   </div>
 
@@ -1064,8 +1073,9 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                 <h3 className="text-base sm:text-lg font-mono font-semibold text-zinc-900 dark:text-zinc-50">
                   {activeModalOrder.order_number}
                 </h3>
-                <p className="text-xs text-zinc-500 font-mono tabular-nums">
-                  Waktu: {formatDate(activeModalOrder.created_at)}
+                <p className="text-xs text-zinc-500 font-mono tabular-nums flex items-center gap-1.5 mt-0.5">
+                  <Clock className="h-3 w-3 text-zinc-400 shrink-0" />
+                  <span>Waktu: {formatDate(activeModalOrder.created_at)} ({formatRelativeTime(activeModalOrder.created_at)})</span>
                 </p>
               </div>
               <button
@@ -1134,7 +1144,7 @@ export default function DashboardView({ initialOrders }: DashboardViewProps) {
                     <div className="flex justify-between p-3 bg-zinc-50 dark:bg-zinc-800/40 text-xs font-medium">
                       <span>Total Pembayaran</span>
                       <span className="text-sm font-semibold font-mono tabular-nums text-zinc-900 dark:text-zinc-50">
-                        {formatCurrency(activeModalOrder.total)}
+                        {formatCurrencyIDR(activeModalOrder.total)}
                       </span>
                     </div>
                   </div>
